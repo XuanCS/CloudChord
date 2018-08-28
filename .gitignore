@@ -1,0 +1,16 @@
+#Gradle
+gradle/
+./gradle/
+build/
+
+# Eclipse
+*.json
+*.properties
+*.gradle
+.classpath
+.project
+.settings/
+bin/
+
+# test
+testDir/
