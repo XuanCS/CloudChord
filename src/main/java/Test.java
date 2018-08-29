@@ -29,13 +29,13 @@ public class Test {
 		//System.out.println("\nType \"info\" to check this node's data or \n type \"quit\"to leave ring: ");
 		System.out.println("\nType \"info\" to check this node's data or \n type \"quit\"to leave ring or \n type \"file\"to transfer files: ");
 
-		long hash = Helper.hashString("test.txt");
+		long hash = Helper.hashString("test_8001.txt");
 //		long hash = Helper.hashString("testHW2.pdf");
 		System.out.println("\nHash value is " + Long.toHexString(hash));
 		
-        System.out.println("number of args: " + args.length);
-		String cmd = "gradle run -PappArgs=[" + "\'1\', " + "\'test.txt\'" + "]";		
-		System.out.println("cmd is: " + cmd);
+//        System.out.println("number of args: " + args.length);
+//		String cmd = "gradle run -PappArgs=[" + "\'1\', " + "\'test.txt\'" + "]";		
+//		System.out.println("cmd is: " + cmd);
 		
 //		String a = "t " || "s";
 		

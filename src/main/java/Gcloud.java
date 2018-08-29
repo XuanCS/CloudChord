@@ -153,12 +153,19 @@ public class Gcloud {
 		}
 
 		File file = service.files().get(res).execute();
+		
+		// create local directory based on folder
+//		String downLoadDirName = "Chord_" + localPortNum;
+		
+		// downloads to target downloads folder
+		String downloadDirName = dirName + Helper.DOWNLOADS;
 
-		OutputStream out = new FileOutputStream(dirName + "/" + file.getName());
+
+		OutputStream out = new FileOutputStream(downloadDirName + "/" + file.getName());
 		Drive.Files.Get request = service.files().get(res);
 		request.executeMediaAndDownloadTo(out);
-		System.out.println("successfully download file to " + dirName);
-		deleteFile(targetFN);
+		System.out.println("successfully download file to " + dirName + Helper.DOWNLOADS);
+//		deleteFile(targetFN);
 
 	}
 

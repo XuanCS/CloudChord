@@ -54,17 +54,9 @@ public class Chord {
 			System.out.println("waiting for join");
 		}
 
-		// create local directory based on folder
-		String DirName = "Chord_" + localPortNum;
-
-		File dirFileName = new File(DirName);
-		if (!dirFileName.exists()) {
-			if (dirFileName.mkdir()) {
-				System.out.println("Directory is created!");
-			} else {
-				System.out.println("Failed to create directory!");
-			}
-		}
+		// create local and downloads directory based on folder
+		String DirName = Helper.createFolder(Integer.toString(localPortNum));
+		String downloadDirName = Helper.createFolder( Integer.toString(localPortNum) + Helper.DOWNLOADS);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
@@ -153,7 +145,6 @@ public class Chord {
 						System.out.println("sending: " + fileName + " success");
 						System.out.println("feedback: " + tmp_response);
 					}
-
 				} else if (op == 2) {
 					if (result.equals(localAddress)) {
 						Gcloud gc = new Gcloud(DirName);

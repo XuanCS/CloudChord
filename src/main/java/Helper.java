@@ -42,6 +42,7 @@ public class Helper {
 
 	private static HashMap<Integer, Long> powerOfTwo = null;
 	// private static String prefix = "recv_";
+	public static final String DOWNLOADS  = "_Downloads";
 
 	/**
 	 * Constructor
@@ -569,7 +570,7 @@ public class Helper {
 				byte[] contents = file.getContents();
 
 				String recvFileName = fileName;
-				FileOutputStream fos = new FileOutputStream(dirName +"/"+recvFileName);
+				FileOutputStream fos = new FileOutputStream(dirName + Helper.DOWNLOADS +"/"+recvFileName);
 				fos.write(contents);
 
 				System.out.println("file size: " + fileSize);
@@ -630,6 +631,20 @@ public class Helper {
 		} else {
 			System.out.println("Delete operation is failed.");
 		}
+	}
+	
+	public static String createFolder(String localChordNum) {
+		String DirName = "Chord_" + localChordNum;
+
+		File dirFileName = new File(DirName);
+		if (!dirFileName.exists()) {
+			if (dirFileName.mkdir()) {
+				System.out.println("Directory is created!");
+			} else {
+				System.out.println("Failed to create directory!");
+			}
+		}
+		return DirName;
 	}
 
 	// public static String inputStreamToStringAlt (InputStream in) {

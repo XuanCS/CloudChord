@@ -114,7 +114,7 @@ public class Talker implements Runnable {
 		} else if (request.startsWith("DOWNLOAD")) {
 			String downfName = request.split("#")[1];
 
-			File myFile = new File(dirName + "/" + downfName);
+			File myFile = new File(dirName + Helper.DOWNLOADS + "/" + downfName);
 			if (!myFile.exists()) {
 				System.out.print("" + "Downloading File does not exit");
 				 return ret;
@@ -139,7 +139,7 @@ public class Talker implements Runnable {
 			
 			outputStream.writeObject(msg);
 			ret = "FINISH_SENDING_DOWNFILE";
-			Helper.deletelocalFile(dirName, downfName);
+			Helper.deletelocalFile(dirName + Helper.DOWNLOADS, downfName);
 
 
 		}
