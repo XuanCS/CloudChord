@@ -87,7 +87,7 @@ public class Gcloud {
 	 */
 	public Credential authorize() throws IOException {
 
-		String filename = "client_secret.json";
+		String filename = Helper.CLIENT_SECRET ;
 
 		java.io.File file = new java.io.File(dirName + "/" + filename);
 		System.out.println("current dir: " + dirName);
@@ -135,18 +135,20 @@ public class Gcloud {
 		if (res != null) {
 			System.out.println("successfully upload");
 		}
-
-		java.io.File propFile = new java.io.File(dirName + "/config.properties");
+		
+		String propFileName = dirName + Helper.CLOUD_LIST;
+		java.io.File propFile = new java.io.File(propFileName);
 		if (propFile.exists()) {
-			updateProp(title, res);
+			Helper.updateProp(title, res, propFileName);
 		} else {
-			writeProp(title, res);
+			Helper.writeProp(title, res, propFileName);
 		}
 		return res;
 	}
 
 	public void downLoadFile(String targetFN) throws IOException {
-		String res = readProp(targetFN);
+		String propFileName = dirName + Helper.CLOUD_LIST;
+		String res = Helper.readProp(targetFN, propFileName);
 		if (res == null) {
 			System.out.println("cannot download the target file");
 			return;
@@ -172,7 +174,9 @@ public class Gcloud {
 	public void deleteFile(String targetFN) {
 		try {
 			// String name = service.files().get(fileId).
-			String res = readProp(targetFN);
+			
+			String propFileName = dirName + Helper.CLOUD_LIST;
+			String res = Helper.readProp(targetFN, propFileName);
 			if (res == null) {
 				System.out.println("cannot download the target file");
 				return;
@@ -200,92 +204,4 @@ public class Gcloud {
 			}
 		}
 	}
-
-	private void writeProp(String key, String value) {
-		Properties prop = new Properties();
-		OutputStream output = null;
-		try {
-			output = new FileOutputStream(dirName + "/config.properties");
-			// set the properties value
-			prop.setProperty(key, value);
-			// save properties to project root folder
-			prop.store(output, null);
-
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if (output != null) {
-				try {
-					output.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-		System.out.println("successfully written to local config.property");
-
-	}
-
-	private String readProp(String key) {
-		Properties prop = new Properties();
-		InputStream input = null;
-		String res = null;
-
-		try {
-
-			input = new FileInputStream(dirName + "/config.properties");
-
-			// load a properties file
-			prop.load(input);
-
-			// get the property value and print it out
-			res = prop.getProperty(key);
-			System.out.println(res);
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return res;
-	}
-
-	private void updateProp(String key, String value) throws IOException {
-		FileInputStream in = new FileInputStream(dirName + "/config.properties");
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
-
-		FileOutputStream out = new FileOutputStream(dirName + "/config.properties");
-		props.setProperty(key, value);
-		props.store(out, null);
-		out.close();
-		System.out.println("successfully update to local config.property");
-	}
-
-	private String seekProp(String target) throws IOException {
-		FileInputStream in = new FileInputStream(dirName + "/config.properties");
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
-
-		// Iterating properties using For-Each
-
-		Set<String> keys = props.stringPropertyNames();
-		for (String key : keys) {
-			if (key.equals(target)) {
-				return props.getProperty(target);
-			}
-		}
-		System.out.println("cannot file in local record");
-		return null;
-	}
-
 }

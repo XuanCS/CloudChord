@@ -1,0 +1,21 @@
+Interpreter: Translates program one statement at a time.
+Compiler: Scans the entire program and translates it as a whole into machine code.
+
+
+First element in the list: (car lst)Tail of the list: (cdr lst)
+
+if-then-else: (if condition then-stmt else-stmt)(if (equal? 'a x)10)
+
+
+Exception in thread "main" java.lang.NullPointerException
+	at com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull(Preconditions.java:213)
+	at com.google.api.client.util.Preconditions.checkNotNull(Preconditions.java:127)
+	at com.google.api.client.auth.oauth2.AuthorizationCodeFlow$Builder.setTransport(AuthorizationCodeFlow.java:545)
+	at com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow$Builder.setTransport(GoogleAuthorizationCodeFlow.java:254)
+	at com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow$Builder.setTransport(GoogleAuthorizationCodeFlow.java:152)
+	at com.google.api.client.auth.oauth2.AuthorizationCodeFlow$Builder.<init>(AuthorizationCodeFlow.java:494)
+	at com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow$Builder.<init>(GoogleAuthorizationCodeFlow.java:195)
+	at Gcloud.authorize(Gcloud.java:109)
+	at Gcloud.getDriveService(Gcloud.java:123)
+	at Gcloud.<init>(Gcloud.java:77)
+	at Chord.main(Chord.java:148)

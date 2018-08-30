@@ -56,7 +56,7 @@ public class Chord {
 
 		// create local and downloads directory based on folder
 		String DirName = Helper.createFolder(Integer.toString(localPortNum));
-		String downloadDirName = Helper.createFolder( Integer.toString(localPortNum) + Helper.DOWNLOADS);
+		String downloadDirName = Helper.createFolder(Integer.toString(localPortNum) + Helper.DOWNLOADS);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
@@ -130,35 +130,58 @@ public class Chord {
 				System.out.println("Node " + result.getAddress().toString() + ", port " + result.getPort()
 						+ ", position " + Helper.hexIdAndPosition(result));
 
-				// String res = Helper.sendRequest(result, "TEST_CMD");
-				// System.out.println("STATUS: " + res);
-				
-//				System.out.println("local equals result?" + localAddress.equals(result));
-//				System.out.println("result " +result);
+				// upload command
 				if (op == 1) {
-					if (result.equals(localAddress)) {					
-						Gcloud gc = new Gcloud(DirName);
-						gc.uploadTextFile(fileName);
-
+					// keep track of all the uploaded files from current node
+					String targetFilePath = DirName + "/" + fileName;
+					File targetFile = new File(targetFilePath);
+					if (!targetFile.exists()) {
+						System.err.println("cannot upload the target file, the target is not in the user's directory");
 					} else {
-						String tmp_response = Helper.sendFile(result, DirName, fileName);
-						System.out.println("sending: " + fileName + " success");
-						System.out.println("feedback: " + tmp_response);
-					}
-				} else if (op == 2) {
-					if (result.equals(localAddress)) {
-						Gcloud gc = new Gcloud(DirName);
-						gc.downLoadFile(fileName);
+						if (result.equals(localAddress)) {
+							Gcloud gc = new Gcloud(DirName);
+							gc.uploadTextFile(fileName);
+						} else {
+							String tmp_response = Helper.sendFile(result, DirName, fileName);
+							System.out.println("sending: " + fileName + " success");
+							System.out.println("feedback: " + tmp_response);
+						}
 
+						// keep track of all the uploaded files from current
+						// node
+						String propFileName = DirName + Helper.FILE_LIST;
+						File propFile = new File(propFileName);
+						if (propFile.exists()) {
+							Helper.updateProp(fileName, fileName, propFileName);
+						} else {
+							Helper.writeProp(fileName, fileName, propFileName);
+						}
+					}
+					// System.err.println("run 1");
+				}
+				// download command
+				else if (op == 2) {
+					// check whether is the legal file from current node
+					String propFileName = DirName + Helper.FILE_LIST;
+					String queryRes = Helper.readProp(fileName, propFileName);
+					if (queryRes == null) {
+						System.err.println(
+								"cannot download the target file, the target file does not belong with the current user");
 					} else {
-						String res = Helper.sendQueryFile(result, DirName, fileName);
-						System.out.println("feedback: " + res);
+						if (result.equals(localAddress)) {
+							Gcloud gc = new Gcloud(DirName);
+							gc.downLoadFile(fileName);
+						} else {
+							String res = Helper.sendQueryFile(result, DirName, fileName);
+							System.out.println("feedback: " + res);
+						}
 					}
-
 				} else {
 					System.out.println("invalid file operation");
 				}
+				// System.err.println("run 2");
 			}
+			// System.err.println("run 3");
 		}
 	}
 }
