@@ -2,6 +2,8 @@
 gradle/
 ./gradle/
 build/
+*.txt
+*.props
 
 # Eclipse
 *.json

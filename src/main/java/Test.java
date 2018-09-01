@@ -1,6 +1,7 @@
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -61,6 +62,8 @@ public class Test {
 //		        System.out.println(i.getHostAddress());
 //		    }
 //		}
+//		Socket s = new Socket();
+//		System.out.println(s.getInetAddress());
 	}
 
 }

@@ -58,7 +58,7 @@ public class Chord {
 		String DirName = Helper.createFolder(Integer.toString(localPortNum));
 		String downloadDirName = Helper.createFolder(Integer.toString(localPortNum) + Helper.DOWNLOADS);
 
-		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
+		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);	
 		m_node = new Node(localAddress, DirName);
 
 		// determine if it's creating or joining a existing ring
@@ -141,20 +141,32 @@ public class Chord {
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
 							gc.uploadTextFile(fileName);
+							
+							String propFileName = DirName + Helper.RECV_FILE_LIST;
+							File propFile = new File(propFileName);
+							String sentSockStr = result.getHostString() + " "+result.getPort();
+							if (propFile.exists()) {
+								Helper.updateProp(fileName, sentSockStr, propFileName);
+							} else {
+								Helper.writeProp(fileName, sentSockStr, propFileName);
+							}
 						} else {
-							String tmp_response = Helper.sendFile(result, DirName, fileName);
+							String localSock = local_ip + " " + localPortNum;
+							String tmp_response = Helper.sendFile(result, DirName, fileName, localSock);
 							System.out.println("sending: " + fileName + " success");
 							System.out.println("feedback: " + tmp_response);
 						}
 
 						// keep track of all the uploaded files from current
 						// node
-						String propFileName = DirName + Helper.FILE_LIST;
+						String propFileName = DirName + Helper.SENT_FILE_LIST;
 						File propFile = new File(propFileName);
+//						System.out.println("res addr: " + result.getHostString());
+						String sentSockStr = result.getHostString() + " "+ result.getPort();
 						if (propFile.exists()) {
-							Helper.updateProp(fileName, fileName, propFileName);
+							Helper.updateProp(fileName, sentSockStr, propFileName);
 						} else {
-							Helper.writeProp(fileName, fileName, propFileName);
+							Helper.writeProp(fileName, sentSockStr, propFileName);
 						}
 					}
 					// System.err.println("run 1");
@@ -162,7 +174,7 @@ public class Chord {
 				// download command
 				else if (op == 2) {
 					// check whether is the legal file from current node
-					String propFileName = DirName + Helper.FILE_LIST;
+					String propFileName = DirName + Helper.SENT_FILE_LIST;
 					String queryRes = Helper.readProp(fileName, propFileName);
 					if (queryRes == null) {
 						System.err.println(

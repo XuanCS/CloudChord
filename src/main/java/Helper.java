@@ -45,7 +45,8 @@ public class Helper {
 	private static HashMap<Integer, Long> powerOfTwo = null;
 	// private static String prefix = "recv_";
 	public static final String DOWNLOADS  = "_Downloads";
-	public static final String FILE_LIST  = "/file.props";
+	public static final String SENT_FILE_LIST  = "/sent_file.props";
+	public static final String RECV_FILE_LIST  = "/recv_file.props";
 	public static final String CLOUD_LIST  = "/cloud.props";
 	public static final String CLIENT_SECRET  = "client_secret.json";
 
@@ -314,7 +315,7 @@ public class Helper {
 	 *         socket or write request to it (3) response read by
 	 *         inputStreamToString() is null
 	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName) {
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock) {
 		// invalid input
 		if (server == null || fileName == null)
 			return null;
@@ -346,6 +347,8 @@ public class Helper {
 			int fileLen = (int) myFile.length();
 			msg.setFileSize(fileLen);
 			msg.setContents(myByteArray);
+			msg.setFileSockInfo(localSock);
+//			msg.setFilePortNum(dirName);
 //			msg.setDirName(dirName);
 
 			outputStream.writeObject(msg);
@@ -526,11 +529,14 @@ public class Helper {
 				if (dirName == null) {
 					System.out.println("need to inialize local directory first");
 				}
+				
+				// receive the target file
 				FileMsg file = (FileMsg) msg;
 				String fileCmd = file.getCmd();
 				int fileSize = file.getFileSize();
 				String fileName = file.getFileName();
 				byte[] contents = file.getContents();
+				String fileSockInfo = file.getFileSockInfo();
 
 				String recvFileName = fileName;
 				FileOutputStream fos = new FileOutputStream(dirName + "/" + recvFileName);
@@ -539,13 +545,27 @@ public class Helper {
 				System.out.println("file size: " + fileSize);
 				System.out.println("finished writing to file");
 				System.out.println("Object received: " + msg);
-				res = fileCmd;
-
+				
+				// save into RECV_LIST
+	
+				String propFileName = dirName + Helper.RECV_FILE_LIST;
+				File propFile = new File(propFileName);
+				if (propFile.exists()) {
+					Helper.updateProp(recvFileName, fileSockInfo, propFileName);
+				} else {
+					Helper.writeProp(recvFileName, fileSockInfo, propFileName);
+				}	
+				
+				
+				// upload to cloud
 				System.out.println("uploading to cloud...");
 
 				Gcloud gc = new Gcloud(dirName);
 				gc.uploadTextFile(fileName);
 				deletelocalFile(dirName, fileName);
+
+				res = fileCmd;
+
 
 			} else if (type == 2) {
 				if (dirName == null) {

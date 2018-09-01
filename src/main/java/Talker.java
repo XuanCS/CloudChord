@@ -111,7 +111,22 @@ public class Talker implements Runnable {
 			ret = "TEST_SUCC";
 		} else if (request.startsWith("FILE")) {
 			ret = "FINISH_RECV";
-		} else if (request.startsWith("DOWNLOAD")) {
+		} else if (request.startsWith("UPLOAD")) {
+//			String upfName = request.split("#")[1];
+//			
+//			String hostAndPort = talkSocket.getInetAddress().getHostAddress();
+//			hostAndPort = hostAndPort + " " + talkSocket.getPort();
+//
+//			String propFileName = dirName + Helper.RECV_FILE_LIST;
+//			File propFile = new File(propFileName);
+//			if (propFile.exists()) {
+//				Helper.updateProp(upfName, hostAndPort, propFileName);
+//			} else {
+//				Helper.writeProp(upfName, hostAndPort, propFileName);
+//			}		
+			ret = "FINISH_UPLOAD_RECV";
+		}	
+		else if (request.startsWith("DOWNLOAD")) {
 			String downfName = request.split("#")[1];
 
 			File myFile = new File(dirName + Helper.DOWNLOADS + "/" + downfName);
