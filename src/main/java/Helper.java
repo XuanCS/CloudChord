@@ -44,11 +44,11 @@ public class Helper {
 
 	private static HashMap<Integer, Long> powerOfTwo = null;
 	// private static String prefix = "recv_";
-	public static final String DOWNLOADS  = "_Downloads";
-	public static final String SENT_FILE_LIST  = "/sent_file.props";
-	public static final String RECV_FILE_LIST  = "/recv_file.props";
-	public static final String CLOUD_LIST  = "/cloud.props";
-	public static final String CLIENT_SECRET  = "client_secret.json";
+	public static final String DOWNLOADS = "_Downloads";
+	public static final String SENT_FILE_LIST = "/sent_file.props";
+	public static final String RECV_FILE_LIST = "/recv_file.props";
+	public static final String CLOUD_LIST = "/cloud.props";
+	public static final String CLIENT_SECRET = "client_secret.json";
 
 	/**
 	 * Constructor
@@ -62,8 +62,6 @@ public class Helper {
 			base *= 2;
 		}
 	}
-	
-
 
 	/**
 	 * Compute a socket address' 32 bit identifier
@@ -315,7 +313,8 @@ public class Helper {
 	 *         socket or write request to it (3) response read by
 	 *         inputStreamToString() is null
 	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock) {
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock,
+			boolean fromDownFolder) {
 		// invalid input
 		if (server == null || fileName == null)
 			return null;
@@ -327,6 +326,10 @@ public class Helper {
 		try {
 			talkSocket = new Socket(server.getAddress(), server.getPort());
 			File myFile = new File(dirName + "/" + fileName);
+			if (fromDownFolder) {
+				myFile = new File(dirName + Helper.DOWNLOADS + "/" + fileName);
+			}
+
 			if (!myFile.exists()) {
 				System.out.print("" + "File does not exit");
 				// return null;
@@ -347,11 +350,22 @@ public class Helper {
 			int fileLen = (int) myFile.length();
 			msg.setFileSize(fileLen);
 			msg.setContents(myByteArray);
-			msg.setFileSockInfo(localSock);
-//			msg.setFilePortNum(dirName);
-//			msg.setDirName(dirName);
+			if (fromDownFolder) {
+				String propFileName = dirName + Helper.RECV_FILE_LIST;
+				String homeSockInfo = Helper.seekProp(fileName, propFileName);
+				msg.setFileSockInfo(homeSockInfo);
+			} else {
+				msg.setFileSockInfo(localSock);
+			}
+			// msg.setFilePortNum(dirName);
+			// msg.setDirName(dirName);
 
 			outputStream.writeObject(msg);
+
+			if (fromDownFolder) {
+				String downPath = dirName + Helper.DOWNLOADS;
+				deletelocalFile(downPath, fileName);
+			}
 
 		} catch (IOException e) {
 			// System.out.println("\nCannot send request to
@@ -418,11 +432,11 @@ public class Helper {
 		}
 
 		// sleep for a short time, waiting for response
-//		try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// Thread.sleep(1000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 
 		// get input stream, try to read something from it
 		ObjectInputStream input = null;
@@ -529,7 +543,7 @@ public class Helper {
 				if (dirName == null) {
 					System.out.println("need to inialize local directory first");
 				}
-				
+
 				// receive the target file
 				FileMsg file = (FileMsg) msg;
 				String fileCmd = file.getCmd();
@@ -545,18 +559,17 @@ public class Helper {
 				System.out.println("file size: " + fileSize);
 				System.out.println("finished writing to file");
 				System.out.println("Object received: " + msg);
-				
+
 				// save into RECV_LIST
-	
+
 				String propFileName = dirName + Helper.RECV_FILE_LIST;
 				File propFile = new File(propFileName);
 				if (propFile.exists()) {
 					Helper.updateProp(recvFileName, fileSockInfo, propFileName);
 				} else {
 					Helper.writeProp(recvFileName, fileSockInfo, propFileName);
-				}	
-				
-				
+				}
+
 				// upload to cloud
 				System.out.println("uploading to cloud...");
 
@@ -565,7 +578,6 @@ public class Helper {
 				deletelocalFile(dirName, fileName);
 
 				res = fileCmd;
-
 
 			} else if (type == 2) {
 				if (dirName == null) {
@@ -581,10 +593,9 @@ public class Helper {
 				Gcloud gc = new Gcloud(dirName);
 				gc.downLoadFile(fileName);
 
-				res = "DOWNLOAD#" +downFileName;
-				
-//				Thread.sleep(2000);
+				res = "DOWNLOAD#" + downFileName;
 
+				// Thread.sleep(2000);
 
 			} else if (type == 3) {
 
@@ -595,7 +606,7 @@ public class Helper {
 				byte[] contents = file.getContents();
 
 				String recvFileName = fileName;
-				FileOutputStream fos = new FileOutputStream(dirName + Helper.DOWNLOADS +"/"+recvFileName);
+				FileOutputStream fos = new FileOutputStream(dirName + Helper.DOWNLOADS + "/" + recvFileName);
 				fos.write(contents);
 
 				System.out.println("file size: " + fileSize);
@@ -613,36 +624,37 @@ public class Helper {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-//		catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		}
+		// catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		return res;
 	}
 
-//	private static String executeCommand(String command) {
-//
-//		StringBuffer output = new StringBuffer();
-//
-//		Process p;
-//		try {
-//			p = Runtime.getRuntime().exec(command);
-//			p.waitFor();
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//
-//			String line = "";
-//			while ((line = reader.readLine()) != null) {
-//				output.append(line + "\n");
-//			}
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//		return output.toString();
-//
-//	}
+	// private static String executeCommand(String command) {
+	//
+	// StringBuffer output = new StringBuffer();
+	//
+	// Process p;
+	// try {
+	// p = Runtime.getRuntime().exec(command);
+	// p.waitFor();
+	// BufferedReader reader = new BufferedReader(new
+	// InputStreamReader(p.getInputStream()));
+	//
+	// String line = "";
+	// while ((line = reader.readLine()) != null) {
+	// output.append(line + "\n");
+	// }
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	//
+	// return output.toString();
+	//
+	// }
 
 	public static void deletelocalFile(String dirName, String fileName) {
 
@@ -657,7 +669,7 @@ public class Helper {
 			System.out.println("Delete operation is failed.");
 		}
 	}
-	
+
 	public static String createFolder(String localChordNum) {
 		String DirName = "Chord_" + localChordNum;
 
@@ -671,8 +683,7 @@ public class Helper {
 		}
 		return DirName;
 	}
-	
-	
+
 	public static void writeProp(String key, String value, String propFileName) {
 		Properties prop = new Properties();
 		OutputStream output = null;
@@ -758,7 +769,26 @@ public class Helper {
 		System.out.println("cannot file in local record");
 		return null;
 	}
-	
+
+	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor)
+			throws IOException {
+
+		String propFileName = dirName + Helper.CLOUD_LIST;
+
+		FileInputStream in = new FileInputStream(propFileName);
+		Properties props = new Properties();
+		props.load(in);
+		in.close();
+
+		for (String key : props.stringPropertyNames()) {
+			Gcloud gc = new Gcloud(dirName);
+			gc.downLoadFile(key);
+
+			String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
+			System.out.println("sending: " + key + " success");
+			System.out.println("feedback: " + tmp_response);
+		}
+	}
 
 	// public static String inputStreamToStringAlt (InputStream in) {
 	//
@@ -826,5 +856,5 @@ public class Helper {
 	//
 	// return res;
 	// }
-	
+
 }

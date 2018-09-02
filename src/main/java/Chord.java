@@ -102,6 +102,13 @@ public class Chord {
 			Scanner userinput = new Scanner(System.in);
 			String command = userinput.next();
 			if (command.startsWith("quit")) {
+				InetSocketAddress successor = m_node.getSuccessor();
+				
+				// iterate all files in cloud
+				String localSock = local_ip + " " + localPortNum;
+
+				Helper.downSendAllCloudFiles(DirName, localSock, successor);
+		
 				m_node.stopAllThreads();
 				System.out.println("Leaving the ring...");
 				System.exit(0);
@@ -152,7 +159,7 @@ public class Chord {
 							}
 						} else {
 							String localSock = local_ip + " " + localPortNum;
-							String tmp_response = Helper.sendFile(result, DirName, fileName, localSock);
+							String tmp_response = Helper.sendFile(result, DirName, fileName, localSock, false);
 							System.out.println("sending: " + fileName + " success");
 							System.out.println("feedback: " + tmp_response);
 						}

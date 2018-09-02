@@ -30,7 +30,7 @@ public class Test {
 		//System.out.println("\nType \"info\" to check this node's data or \n type \"quit\"to leave ring: ");
 		System.out.println("\nType \"info\" to check this node's data or \n type \"quit\"to leave ring or \n type \"file\"to transfer files: ");
 
-		long hash = Helper.hashString("test_8001.txt");
+		long hash = Helper.hashString("note.txt");
 //		long hash = Helper.hashString("testHW2.pdf");
 		System.out.println("\nHash value is " + Long.toHexString(hash));
 		
