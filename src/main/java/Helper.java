@@ -632,30 +632,6 @@ public class Helper {
 		return res;
 	}
 
-	// private static String executeCommand(String command) {
-	//
-	// StringBuffer output = new StringBuffer();
-	//
-	// Process p;
-	// try {
-	// p = Runtime.getRuntime().exec(command);
-	// p.waitFor();
-	// BufferedReader reader = new BufferedReader(new
-	// InputStreamReader(p.getInputStream()));
-	//
-	// String line = "";
-	// while ((line = reader.readLine()) != null) {
-	// output.append(line + "\n");
-	// }
-	//
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	//
-	// return output.toString();
-	//
-	// }
-
 	public static void deletelocalFile(String dirName, String fileName) {
 
 		File f = new File(dirName + "/" + fileName);
@@ -684,6 +660,26 @@ public class Helper {
 		return DirName;
 	}
 
+	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor)
+			throws IOException {
+
+		String propFileName = dirName + Helper.CLOUD_LIST;
+
+		FileInputStream in = new FileInputStream(propFileName);
+		Properties props = new Properties();
+		props.load(in);
+		in.close();
+
+		for (String key : props.stringPropertyNames()) {
+			Gcloud gc = new Gcloud(dirName);
+			gc.downLoadFile(key);
+
+			String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
+			System.out.println("sending: " + key + " success");
+			System.out.println("feedback: " + tmp_response);
+		}
+	}
+	
 	public static void writeProp(String key, String value, String propFileName) {
 		Properties prop = new Properties();
 		OutputStream output = null;
@@ -770,91 +766,5 @@ public class Helper {
 		return null;
 	}
 
-	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor)
-			throws IOException {
-
-		String propFileName = dirName + Helper.CLOUD_LIST;
-
-		FileInputStream in = new FileInputStream(propFileName);
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
-
-		for (String key : props.stringPropertyNames()) {
-			Gcloud gc = new Gcloud(dirName);
-			gc.downLoadFile(key);
-
-			String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
-			System.out.println("sending: " + key + " success");
-			System.out.println("feedback: " + tmp_response);
-		}
-	}
-
-	// public static String inputStreamToStringAlt (InputStream in) {
-	//
-	// // invalid input
-	// if (in == null) {
-	// return null;
-	// }
-	// byte[] buffer = new byte[50];
-	// try {
-	// in.read(buffer);
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// String res = new String(buffer);
-	//
-	//
-	// // try to read line from input stream
-	//// BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-	//// StringBuilder sb = new StringBuilder();
-	//// String line = null;
-	//// try {
-	//// line = reader.readLine();
-	//// int len = in.read(buffer);
-	//
-	//
-	//// if (line.startsWith("FILE")) {
-	//// String fileName = line.split("_")[1];
-	// // method 1, not work
-	//// String fileSizeStr = line.split("_")[2];
-	//// int fileSize = Integer.parseInt(fileSizeStr);
-	//// byte[] buffer = new byte[fileSize + 1000];
-	//// // byte[] buffer = new byte[fileSize];
-	////
-	//// //
-	//// int len = in.read(buffer);
-	//// System.out.println("RECEIVED FROM CLIENT: ");
-	//// System.out.println("size of file: " + len);
-	////
-	//// FileOutputStream fos;
-	////
-	//// fos = new FileOutputStream(prefix + fileName);
-	//// fos.write(buffer);
-	////
-	//// System.out.println("Finish Receiving File");
-	//
-	//
-	// // method 2, works
-	//
-	//// BufferedWriter writer = new BufferedWriter(new FileWriter(prefix +
-	// fileName));
-	//// String fileLine = null;
-	//// while((fileLine = reader.readLine()) != null) {
-	//// writer.write(fileLine);
-	//// writer.newLine();
-	//// }
-	//// System.out.println("Finish Receiving and Writing File");
-	//// writer.close();
-	// // }
-	//
-	//// } catch (IOException e) {
-	//// System.out.println("Cannot read line from input stream.");
-	//// return null;
-	//// }
-	//
-	// return res;
-	// }
 
 }
