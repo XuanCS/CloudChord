@@ -1,3 +1,5 @@
+package chord;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -58,7 +60,7 @@ public class Chord {
 		String DirName = Helper.createFolder(Integer.toString(localPortNum));
 		String downloadDirName = Helper.createFolder(Integer.toString(localPortNum) + Helper.DOWNLOADS);
 
-		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);	
+		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
 
 		// determine if it's creating or joining a existing ring
@@ -103,12 +105,12 @@ public class Chord {
 			String command = userinput.next();
 			if (command.startsWith("quit")) {
 				InetSocketAddress successor = m_node.getSuccessor();
-				
+
 				// iterate all files in cloud
 				String localSock = local_ip + " " + localPortNum;
 
 				Helper.downSendAllCloudFiles(DirName, localSock, successor);
-		
+
 				m_node.stopAllThreads();
 				System.out.println("Leaving the ring...");
 				System.exit(0);
@@ -148,10 +150,10 @@ public class Chord {
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
 							gc.uploadTextFile(fileName);
-							
+
 							String propFileName = DirName + Helper.RECV_FILE_LIST;
 							File propFile = new File(propFileName);
-							String sentSockStr = result.getHostString() + " "+result.getPort();
+							String sentSockStr = result.getHostString() + " " + result.getPort();
 							if (propFile.exists()) {
 								Helper.updateProp(fileName, sentSockStr, propFileName);
 							} else {
@@ -168,8 +170,9 @@ public class Chord {
 						// node
 						String propFileName = DirName + Helper.SENT_FILE_LIST;
 						File propFile = new File(propFileName);
-//						System.out.println("res addr: " + result.getHostString());
-						String sentSockStr = result.getHostString() + " "+ result.getPort();
+						// System.out.println("res addr: " +
+						// result.getHostString());
+						String sentSockStr = result.getHostString() + " " + result.getPort();
 						if (propFile.exists()) {
 							Helper.updateProp(fileName, sentSockStr, propFileName);
 						} else {
