@@ -13,6 +13,9 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 
+import utils.Helper;
+import utils.Props;
+
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import com.google.api.client.http.HttpResponse;
@@ -140,16 +143,16 @@ public class Gcloud {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		java.io.File propFile = new java.io.File(propFileName);
 		if (propFile.exists()) {
-			Helper.updateProp(title, res, propFileName);
+			Props.updateProp(title, res, propFileName);
 		} else {
-			Helper.writeProp(title, res, propFileName);
+			Props.writeProp(title, res, propFileName);
 		}
 		return res;
 	}
 
 	public void downLoadFile(String targetFN) throws IOException {
 		String propFileName = dirName + Helper.CLOUD_LIST;
-		String res = Helper.readProp(targetFN, propFileName);
+		String res = Props.readProp(targetFN, propFileName);
 		if (res == null) {
 			System.out.println("cannot download the target file");
 			return;
@@ -177,7 +180,7 @@ public class Gcloud {
 			// String name = service.files().get(fileId).
 			
 			String propFileName = dirName + Helper.CLOUD_LIST;
-			String res = Helper.readProp(targetFN, propFileName);
+			String res = Props.readProp(targetFN, propFileName);
 			if (res == null) {
 				System.out.println("cannot download the target file");
 				return;

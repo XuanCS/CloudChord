@@ -2,6 +2,8 @@ package chord;
 import java.net.InetSocketAddress;
 import java.util.Random;
 
+import utils.Helper;
+
 /**
  * Fixfingers thread that periodically access a random entry in finger table 
  * and fix it.

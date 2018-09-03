@@ -1,4 +1,4 @@
-package chord;
+package utils;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
 
+import chord.Gcloud;
 import fileSys.FileMsg;
 import fileSys.Msg;
 import fileSys.SigMsg;
@@ -353,7 +354,7 @@ public class Helper {
 			msg.setContents(myByteArray);
 			if (fromDownFolder) {
 				String propFileName = dirName + Helper.RECV_FILE_LIST;
-				String homeSockInfo = Helper.seekProp(fileName, propFileName);
+				String homeSockInfo = Props.seekProp(fileName, propFileName);
 				msg.setFileSockInfo(homeSockInfo);
 			} else {
 				msg.setFileSockInfo(localSock);
@@ -431,13 +432,6 @@ public class Helper {
 			// System.out.println("\nCannot send request to
 			// "+server.toString()+"\nRequest is: "+req+"\n");
 		}
-
-		// sleep for a short time, waiting for response
-		// try {
-		// Thread.sleep(1000);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
 
 		// get input stream, try to read something from it
 		ObjectInputStream input = null;
@@ -566,9 +560,9 @@ public class Helper {
 				String propFileName = dirName + Helper.RECV_FILE_LIST;
 				File propFile = new File(propFileName);
 				if (propFile.exists()) {
-					Helper.updateProp(recvFileName, fileSockInfo, propFileName);
+					Props.updateProp(recvFileName, fileSockInfo, propFileName);
 				} else {
-					Helper.writeProp(recvFileName, fileSockInfo, propFileName);
+					Props.writeProp(recvFileName, fileSockInfo, propFileName);
 				}
 
 				// upload to cloud
@@ -681,91 +675,7 @@ public class Helper {
 		}
 	}
 	
-	public static void writeProp(String key, String value, String propFileName) {
-		Properties prop = new Properties();
-		OutputStream output = null;
-		try {
-			output = new FileOutputStream(propFileName);
-			// set the properties value
-			prop.setProperty(key, value);
-			// save properties to project root folder
-			prop.store(output, null);
 
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if (output != null) {
-				try {
-					output.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-		System.out.println("successfully written to local cloud.props");
-
-	}
-
-	public static String readProp(String key, String propFileName) {
-		Properties prop = new Properties();
-		InputStream input = null;
-		String res = null;
-
-		try {
-			input = new FileInputStream(propFileName);
-
-			// load a properties file
-			prop.load(input);
-
-			// get the property value and print it out
-			res = prop.getProperty(key);
-			System.out.println(res);
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return res;
-	}
-
-	public static void updateProp(String key, String value, String propFileName) throws IOException {
-		FileInputStream in = new FileInputStream(propFileName);
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
-
-		FileOutputStream out = new FileOutputStream(propFileName);
-		props.setProperty(key, value);
-		props.store(out, null);
-		out.close();
-		System.out.println("successfully update to local config.property");
-	}
-
-	public static String seekProp(String target, String propFileName) throws IOException {
-		FileInputStream in = new FileInputStream(propFileName);
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
-
-		// Iterating properties using For-Each
-
-		Set<String> keys = props.stringPropertyNames();
-		for (String key : keys) {
-			if (key.equals(target)) {
-				return props.getProperty(target);
-			}
-		}
-		System.out.println("cannot file in local record");
-		return null;
-	}
 
 
 }

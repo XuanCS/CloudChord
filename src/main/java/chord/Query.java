@@ -2,6 +2,8 @@ package chord;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
+import utils.Helper;
+
 /**
  * Query class that offers the interface by which users can do search by
  * querying a valid chord node.

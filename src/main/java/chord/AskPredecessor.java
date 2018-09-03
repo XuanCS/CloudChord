@@ -1,6 +1,8 @@
 package chord;
 import java.net.InetSocketAddress;
 
+import utils.Helper;
+
 /**
  * Ask predecessor thread that periodically asks for predecessor's keep-alive,
  * and delete predecessor if it's dead.

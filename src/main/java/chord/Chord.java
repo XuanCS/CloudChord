@@ -7,6 +7,9 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+import utils.Helper;
+import utils.Props;
+
 /**
  * Chord class that offers the UI to create chord node and join a existing chord
  * ring.
@@ -155,9 +158,9 @@ public class Chord {
 							File propFile = new File(propFileName);
 							String sentSockStr = result.getHostString() + " " + result.getPort();
 							if (propFile.exists()) {
-								Helper.updateProp(fileName, sentSockStr, propFileName);
+								Props.updateProp(fileName, sentSockStr, propFileName);
 							} else {
-								Helper.writeProp(fileName, sentSockStr, propFileName);
+								Props.writeProp(fileName, sentSockStr, propFileName);
 							}
 						} else {
 							String localSock = local_ip + " " + localPortNum;
@@ -174,9 +177,9 @@ public class Chord {
 						// result.getHostString());
 						String sentSockStr = result.getHostString() + " " + result.getPort();
 						if (propFile.exists()) {
-							Helper.updateProp(fileName, sentSockStr, propFileName);
+							Props.updateProp(fileName, sentSockStr, propFileName);
 						} else {
-							Helper.writeProp(fileName, sentSockStr, propFileName);
+							Props.writeProp(fileName, sentSockStr, propFileName);
 						}
 					}
 					// System.err.println("run 1");
@@ -185,7 +188,7 @@ public class Chord {
 				else if (op == 2) {
 					// check whether is the legal file from current node
 					String propFileName = DirName + Helper.SENT_FILE_LIST;
-					String queryRes = Helper.readProp(fileName, propFileName);
+					String queryRes = Props.readProp(fileName, propFileName);
 					if (queryRes == null) {
 						System.err.println(
 								"cannot download the target file, the target file does not belong with the current user");
