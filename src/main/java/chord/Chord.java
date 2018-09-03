@@ -182,7 +182,7 @@ public class Chord {
 							Props.writeProp(fileName, sentSockStr, propFileName);
 						}
 					}
-					// System.err.println("run 1");
+					// System.err.println("run 1"); test
 				}
 				// download command
 				else if (op == 2) {
