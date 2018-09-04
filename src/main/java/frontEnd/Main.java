@@ -47,13 +47,12 @@ public class Main {
 	public Main() {
 		current_info = new ArrayList<String>();
 		frame = new JFrame("Cloud Chord App");
-		frame.setSize(850, 600);
+		frame.setSize(frontUtils.FRAME_WIDTH, frontUtils.FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		writingDone = new JLabel();
 		m_helper = new Helper();
 
-		
 		try {
 			local_ip = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e1) {
@@ -67,62 +66,75 @@ public class Main {
 		panel.setLayout(null); // add components by coordinates
 
 		JLabel M_dir = new JLabel("Initiate");
-		M_dir.setBounds(25, 10, 150, 25);
+		M_dir.setBounds(frontUtils.firstX_loc, frontUtils.aboveFirstLineY_loc, frontUtils.LABEL_WIDTH,
+				frontUtils.LABEL_HEIGHT);
 
 		starter = new JTextField();
-		starter.setBounds(20, 45, 250, 25);
+		starter.setBounds(frontUtils.firstX_loc, frontUtils.firstLineY_loc, frontUtils.FIELD_WIDTH,
+				frontUtils.FIELD_HEIGHT);
 
 		JLabel M_star = new JLabel("Join");
-		M_star.setBounds(25, 80, 150, 25);
+		M_star.setBounds(frontUtils.firstX_loc, frontUtils.aboveSecondLineY_loc, frontUtils.LABEL_WIDTH,
+				frontUtils.LABEL_HEIGHT);
 
 		follower = new JTextField();
-		follower.setBounds(20, 115, 250, 25);
-		
-		uploadField = new JTextField();
-		uploadField.setBounds(550, 100, 250, 25);
-		
-		downloadField = new JTextField();
-		downloadField.setBounds(550, 170, 250, 25);
+		follower.setBounds(frontUtils.firstX_loc, frontUtils.secondLineY_loc, frontUtils.FIELD_WIDTH,
+				frontUtils.FIELD_HEIGHT);
 
-		JLabel info = new JLabel("Function");
-		info.setBounds(425, 10, 150, 25);
+		uploadField = new JTextField();
+		uploadField.setBounds(frontUtils.fourthX_loc, frontUtils.secondLineY_loc, frontUtils.FIELD_WIDTH,
+				frontUtils.FIELD_HEIGHT);
+
+		downloadField = new JTextField();
+		downloadField.setBounds(frontUtils.fourthX_loc, frontUtils.thirdLineY_loc, frontUtils.FIELD_WIDTH,
+				frontUtils.FIELD_HEIGHT);
 
 		JButton startBtn = new JButton("Start");
-		startBtn.setBounds(300, 35, 75, 35);
+		startBtn.setBounds(frontUtils.secondX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit1.setBackground(Color.GREEN);
 		startBtn.setOpaque(true);
-		
+
 		JButton joinBtn = new JButton("Join");
-		joinBtn.setBounds(300, 105, 75, 35);
+		joinBtn.setBounds(frontUtils.secondX_loc, frontUtils.secondLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit2.setBackground(Color.GREEN);
 		joinBtn.setOpaque(true);
 
-		JButton clear = new JButton("Clear");
-		clear.setBounds(600, 250, 75, 50);
-		// clear.setBackground(Color.BLUE);
-		clear.setOpaque(true);
-		
+		JLabel info = new JLabel("Function");
+		info.setBounds(frontUtils.thirdX_loc, frontUtils.aboveFirstLineY_loc, frontUtils.LABEL_WIDTH,
+				frontUtils.LABEL_HEIGHT);
+
 		JButton inforBtn = new JButton("Info");
-		inforBtn.setBounds(450, 35, 75, 35);
+		inforBtn.setBounds(frontUtils.thirdX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit1.setBackground(Color.GREEN);
 		inforBtn.setOpaque(true);
-		
+
 		JButton downloadBtn = new JButton("Download");
-		downloadBtn.setBounds(450, 170, 75, 35);
+		downloadBtn.setBounds(frontUtils.thirdX_loc, frontUtils.thirdLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit1.setBackground(Color.GREEN);
 		downloadBtn.setOpaque(true);
-		
+
 		JButton uploadBtn = new JButton("Upload");
-		uploadBtn.setBounds(450, 100, 75, 35); 
+		uploadBtn.setBounds(frontUtils.thirdX_loc, frontUtils.secondLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit1.setBackground(Color.GREEN);
 		uploadBtn.setOpaque(true);
-		
-		
+
 		JButton quitBtn = new JButton("Quit");
-		quitBtn.setBounds(550, 35, 75, 35);
+		quitBtn.setBounds(frontUtils.fourthX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_HEIGHT);
 		// submit1.setBackground(Color.GREEN);
 		quitBtn.setOpaque(true);
-		
+
+		JButton clear = new JButton("Clear");
+		clear.setBounds(frontUtils.lastX_loc, frontUtils.fourthLineY_loc, frontUtils.button_WIDTH,
+				frontUtils.button_LG_HEIGHT);
+		// clear.setBackground(Color.BLUE);
+		clear.setOpaque(true);
+
 		// function for button
 		startBtn.addActionListener(new ActionListener() {
 			@Override
@@ -133,11 +145,11 @@ public class Main {
 				// illegal check
 
 				startNodeAndFolder(localPortNum);
-				m_contact = m_node.getAddress();				
+				m_contact = m_node.getAddress();
 				isJoinRing();
 			}
 		});
-		
+
 		joinBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -145,8 +157,7 @@ public class Main {
 				String introNode = follower.getText();
 
 				// illegal check
-				
-				
+
 				localPortNum = introNode.split(" ")[0];
 				String targetIP = introNode.split(" ")[1];
 				String targetIPPort = introNode.split(" ")[2];
@@ -160,15 +171,9 @@ public class Main {
 					System.out.println("Cannot find address you are trying to contact. Now exit.");
 					return;
 				}
-				
 				isJoinRing();
-
 			}
 		});
-
-
-
-
 
 		inforBtn.addActionListener(new ActionListener() {
 
@@ -181,7 +186,7 @@ public class Main {
 				}
 			}
 		});
-		
+
 		quitBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -201,7 +206,6 @@ public class Main {
 			}
 		});
 
-
 		uploadBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -210,7 +214,7 @@ public class Main {
 				String inputFileName = uploadField.getText();
 				checkInputFile(inputFileName);
 				InetSocketAddress result = getFileSuccessor(inputFileName);
-				
+
 				String targetFilePath = DirName + "/" + inputFileName;
 				File targetFile = new File(targetFilePath);
 				if (!targetFile.exists()) {
@@ -251,7 +255,6 @@ public class Main {
 			}
 		});
 
-
 		downloadBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -261,7 +264,6 @@ public class Main {
 				checkInputFile(inputFileName);
 				InetSocketAddress result = getFileSuccessor(inputFileName);
 
-				
 				String propFileName = DirName + Helper.SENT_FILE_LIST;
 				String queryRes = Props.readProp(inputFileName, propFileName);
 				if (queryRes == null) {
@@ -279,7 +281,7 @@ public class Main {
 
 			}
 		});
-		
+
 		clear.addActionListener(new ActionListener() {
 
 			@Override
@@ -293,9 +295,6 @@ public class Main {
 				writingDone.setText("");
 			}
 		});
-
-
-
 
 		panel.add(M_dir);
 		panel.add(M_star);
@@ -316,7 +315,7 @@ public class Main {
 		frame.add(panel);
 		frame.setVisible(true);
 	}
-	
+
 	private void startNodeAndFolder(String localPortNum) {
 		DirName = Helper.createFolder(localPortNum);
 		String downloadDirName = Helper.createFolder(localPortNum) + Helper.DOWNLOADS;
@@ -324,20 +323,20 @@ public class Main {
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
 	}
-	
+
 	private boolean isJoinRing() {
 		boolean successful_join = m_node.join(m_contact);
 		if (!successful_join) {
 			System.out.println("Cannot connect with node you are trying to contact. Now exit.");
 			System.exit(0);
 		}
-		
+
 		System.out.println("Joining the Chord ring.");
 		System.out.println("Local IP: " + local_ip);
 		m_node.printNeighbors();
 		return true;
 	}
-	
+
 	private boolean checkInputFile(String fileName) {
 		long hash = Helper.hashString(fileName);
 		System.out.println("\nHash value is " + Long.toHexString(hash));
@@ -350,7 +349,7 @@ public class Main {
 		}
 		return true;
 	}
-	
+
 	private InetSocketAddress getFileSuccessor(String fileName) {
 		long hash = Helper.hashString(fileName);
 		System.out.println("\nHash value is " + Long.toHexString(hash));
