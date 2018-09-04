@@ -24,16 +24,43 @@ import utils.Props;
 
 public class Main {
 
+	public static final int FRAME_WIDTH = 850;
+	public static final int FRAME_HEIGHT = 600;
+
+	public static final int FIELD_WIDTH = 250;
+	public static final int FIELD_HEIGHT = 35;
+
+	public static final int LABEL_WIDTH = 150;
+	public static final int LABEL_LONG_WIDTH = 350;
+	public static final int LABEL_HEIGHT = 30;
+
+	public static final int button_WIDTH = 75;
+	public static final int button_HEIGHT = 35;
+	public static final int button_LG_HEIGHT = 50;
+
+	public static final int firstX_loc = 25;
+	public static final int secondX_loc = 300;
+	public static final int thirdX_loc = 450;
+	public static final int fourthX_loc = 550;
+	public static final int lastX_loc = 725;
+
+	public static final int aboveFirstLineY_loc = 10;
+	public static final int firstLineY_loc = 35;
+	public static final int aboveSecondLineY_loc = 80;
+	public static final int secondLineY_loc = 105;
+	public static final int belowSecondLineY_loc = 140;
+	public static final int thirdLineY_loc = 175;
+	public static final int belowThirdLineY_loc = 210;
+	public static final int fourthLineY_loc = 245;
+
 	private JFrame frame;
 	private JTextField starter;
 	private JTextField follower;
 	private JTextField uploadField;
 	private JTextField downloadField;
 
-	private JLabel writingDone;
-	private JTextArea Information;
-	private ArrayList<String> current_info;
-	private JTextArea Prediction;
+	private JLabel illegalUpload;
+	private JLabel illegalDownload;
 
 	private static Node m_node;
 	private static InetSocketAddress m_contact;
@@ -45,12 +72,12 @@ public class Main {
 	private String DirName;
 
 	public Main() {
-		current_info = new ArrayList<String>();
 		frame = new JFrame("Cloud Chord App");
-		frame.setSize(frontUtils.FRAME_WIDTH, frontUtils.FRAME_HEIGHT);
+		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
-		writingDone = new JLabel();
+		illegalUpload = new JLabel();
+		illegalDownload = new JLabel();
 		m_helper = new Helper();
 
 		try {
@@ -62,76 +89,65 @@ public class Main {
 	}
 
 	public void mainFrame() {
+		// set label
 		JPanel panel = new JPanel();
 		panel.setLayout(null); // add components by coordinates
 
 		JLabel M_dir = new JLabel("Initiate");
-		M_dir.setBounds(frontUtils.firstX_loc, frontUtils.aboveFirstLineY_loc, frontUtils.LABEL_WIDTH,
-				frontUtils.LABEL_HEIGHT);
-
-		starter = new JTextField();
-		starter.setBounds(frontUtils.firstX_loc, frontUtils.firstLineY_loc, frontUtils.FIELD_WIDTH,
-				frontUtils.FIELD_HEIGHT);
+		M_dir.setBounds(firstX_loc, aboveFirstLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
 
 		JLabel M_star = new JLabel("Join");
-		M_star.setBounds(frontUtils.firstX_loc, frontUtils.aboveSecondLineY_loc, frontUtils.LABEL_WIDTH,
-				frontUtils.LABEL_HEIGHT);
+		M_star.setBounds(firstX_loc, aboveSecondLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+
+		JLabel info = new JLabel("Function");
+		info.setBounds(thirdX_loc, aboveFirstLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+
+		illegalUpload.setBounds(thirdX_loc, belowSecondLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
+		illegalUpload.setForeground(Color.RED);
+
+		illegalDownload.setBounds(thirdX_loc, belowThirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
+		illegalDownload.setForeground(Color.RED);
+
+		// set field
+		starter = new JTextField();
+		starter.setBounds(firstX_loc, firstLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 
 		follower = new JTextField();
-		follower.setBounds(frontUtils.firstX_loc, frontUtils.secondLineY_loc, frontUtils.FIELD_WIDTH,
-				frontUtils.FIELD_HEIGHT);
+		follower.setBounds(firstX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 
 		uploadField = new JTextField();
-		uploadField.setBounds(frontUtils.fourthX_loc, frontUtils.secondLineY_loc, frontUtils.FIELD_WIDTH,
-				frontUtils.FIELD_HEIGHT);
+		uploadField.setBounds(fourthX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 
 		downloadField = new JTextField();
-		downloadField.setBounds(frontUtils.fourthX_loc, frontUtils.thirdLineY_loc, frontUtils.FIELD_WIDTH,
-				frontUtils.FIELD_HEIGHT);
+		downloadField.setBounds(fourthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 
+		// set button
 		JButton startBtn = new JButton("Start");
-		startBtn.setBounds(frontUtils.secondX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit1.setBackground(Color.GREEN);
+		startBtn.setBounds(secondX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		startBtn.setOpaque(true);
 
 		JButton joinBtn = new JButton("Join");
-		joinBtn.setBounds(frontUtils.secondX_loc, frontUtils.secondLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit2.setBackground(Color.GREEN);
+		joinBtn.setBounds(secondX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
 		joinBtn.setOpaque(true);
 
-		JLabel info = new JLabel("Function");
-		info.setBounds(frontUtils.thirdX_loc, frontUtils.aboveFirstLineY_loc, frontUtils.LABEL_WIDTH,
-				frontUtils.LABEL_HEIGHT);
-
 		JButton inforBtn = new JButton("Info");
-		inforBtn.setBounds(frontUtils.thirdX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit1.setBackground(Color.GREEN);
+		inforBtn.setBounds(thirdX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		inforBtn.setOpaque(true);
 
 		JButton downloadBtn = new JButton("Download");
-		downloadBtn.setBounds(frontUtils.thirdX_loc, frontUtils.thirdLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit1.setBackground(Color.GREEN);
+		downloadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
 		downloadBtn.setOpaque(true);
 
 		JButton uploadBtn = new JButton("Upload");
-		uploadBtn.setBounds(frontUtils.thirdX_loc, frontUtils.secondLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit1.setBackground(Color.GREEN);
+		uploadBtn.setBounds(thirdX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
 		uploadBtn.setOpaque(true);
 
 		JButton quitBtn = new JButton("Quit");
-		quitBtn.setBounds(frontUtils.fourthX_loc, frontUtils.firstLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_HEIGHT);
-		// submit1.setBackground(Color.GREEN);
+		quitBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		quitBtn.setOpaque(true);
 
 		JButton clear = new JButton("Clear");
-		clear.setBounds(frontUtils.lastX_loc, frontUtils.fourthLineY_loc, frontUtils.button_WIDTH,
-				frontUtils.button_LG_HEIGHT);
+		clear.setBounds(lastX_loc, fourthLineY_loc, button_WIDTH, button_LG_HEIGHT);
 		// clear.setBackground(Color.BLUE);
 		clear.setOpaque(true);
 
@@ -218,7 +234,7 @@ public class Main {
 				String targetFilePath = DirName + "/" + inputFileName;
 				File targetFile = new File(targetFilePath);
 				if (!targetFile.exists()) {
-					System.err.println("cannot upload the target file, the target is not in the user's directory");
+					illegalUpload.setText("the target file is not in the user's directory");
 				} else {
 					if (result.equals(localAddress)) {
 						Gcloud gc = new Gcloud(DirName);
@@ -267,8 +283,7 @@ public class Main {
 				String propFileName = DirName + Helper.SENT_FILE_LIST;
 				String queryRes = Props.readProp(inputFileName, propFileName);
 				if (queryRes == null) {
-					System.err.println(
-							"cannot download the target file, the target file does not belong with the current user");
+					illegalDownload.setText("the target file does not belong with the current user");
 				} else {
 					if (result.equals(localAddress)) {
 						Gcloud gc = new Gcloud(DirName);
@@ -286,13 +301,14 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				current_info.clear();
-				Information.setText("");
-				starter.setEditable(true);
-				follower.setEditable(true);
-				Prediction.setText("");
-				writingDone.setText("");
+				// starter.setEditable(true);
+				// follower.setEditable(true);
+
+				uploadField.setText("");
+				downloadField.setText("");
+				illegalUpload.setText("");
+				illegalDownload.setText("");
+
 			}
 		});
 
@@ -302,6 +318,8 @@ public class Main {
 		panel.add(follower);
 		panel.add(uploadField);
 		panel.add(downloadField);
+		panel.add(illegalUpload);
+		panel.add(illegalDownload);
 		panel.add(info);
 		panel.add(startBtn);
 		panel.add(joinBtn);
@@ -310,7 +328,6 @@ public class Main {
 		panel.add(downloadBtn);
 		panel.add(quitBtn);
 		panel.add(clear);
-		panel.add(writingDone);
 
 		frame.add(panel);
 		frame.setVisible(true);
