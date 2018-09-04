@@ -1,4 +1,5 @@
 package utils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -655,27 +656,33 @@ public class Helper {
 		return DirName;
 	}
 
-	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor)
-			throws IOException {
+	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor) {
 
 		String propFileName = dirName + Helper.CLOUD_LIST;
 
-		FileInputStream in = new FileInputStream(propFileName);
-		Properties props = new Properties();
-		props.load(in);
-		in.close();
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
 
-		for (String key : props.stringPropertyNames()) {
-			Gcloud gc = new Gcloud(dirName);
-			gc.downLoadFile(key);
+			Properties props = new Properties();
+			props.load(in);
+			in.close();
 
-			String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
-			System.out.println("sending: " + key + " success");
-			System.out.println("feedback: " + tmp_response);
+			for (String key : props.stringPropertyNames()) {
+				Gcloud gc = new Gcloud(dirName);
+				gc.downLoadFile(key);
+
+				String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
+				System.out.println("sending: " + key + " success");
+				System.out.println("feedback: " + tmp_response);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
-
-
 
 }

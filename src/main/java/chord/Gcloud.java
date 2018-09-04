@@ -1,4 +1,5 @@
 package chord;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -23,6 +24,7 @@ import com.google.api.client.http.GenericUrl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileOutputStream;
@@ -64,10 +66,11 @@ public class Gcloud {
 
 	private static final java.util.Collection<String> SCOPES = DriveScopes.all();
 
-	public Gcloud(String folderName) throws IOException {
+	public Gcloud(String folderName) {
 		dirName = folderName;
 
-		DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".credentials_"+ folderName +"/drive-java-quickstart");
+		DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"),
+				".credentials_" + folderName + "/drive-java-quickstart");
 		try {
 			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 			DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
@@ -89,22 +92,34 @@ public class Gcloud {
 	 * @return an authorized Credential object.
 	 * @throws IOException
 	 */
-	public Credential authorize() throws IOException {
+	public Credential authorize() {
 
-		String filename = Helper.CLIENT_SECRET ;
+		String filename = Helper.CLIENT_SECRET;
 
 		java.io.File file = new java.io.File(dirName + "/" + filename);
 		System.out.println("current dir: " + dirName);
 
-		InputStream in = new FileInputStream(file);
-		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+		InputStream in;
+		Credential credential = null;
+		try {
+			in = new FileInputStream(file);
 
-		// Build flow and trigger user authorization request.
-		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+			GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+			// Build flow and trigger user authorization request.
+			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+					clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+			credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+			System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return credential;
+
 	}
 
 	/**
@@ -113,12 +128,12 @@ public class Gcloud {
 	 * @return an authorized Drive client service
 	 * @throws IOException
 	 */
-	public Drive getDriveService() throws IOException {
+	public Drive getDriveService() {
 		Credential credential = authorize();
 		return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 	}
 
-	public String uploadTextFile(String title) throws IOException {
+	public String uploadTextFile(String title) {
 
 		String filePath = dirName + "/" + title;
 		File body = new File();
@@ -131,26 +146,34 @@ public class Gcloud {
 			System.out.println("service is null");
 		}
 
-		File file = service.files().create(body, mediaContent).execute();
+		File file;
+		String res = null;
+		try {
+			file = service.files().create(body, mediaContent).execute();
 
-		String res = file.getId();
-		System.out.println("fileID: " + res);
+			res = file.getId();
+			System.out.println("fileID: " + res);
 
-		if (res != null) {
-			System.out.println("successfully upload");
-		}
-		
-		String propFileName = dirName + Helper.CLOUD_LIST;
-		java.io.File propFile = new java.io.File(propFileName);
-		if (propFile.exists()) {
-			Props.updateProp(title, res, propFileName);
-		} else {
-			Props.writeProp(title, res, propFileName);
+			if (res != null) {
+				System.out.println("successfully upload");
+			}
+
+			String propFileName = dirName + Helper.CLOUD_LIST;
+			java.io.File propFile = new java.io.File(propFileName);
+			if (propFile.exists()) {
+				Props.updateProp(title, res, propFileName);
+			} else {
+				Props.writeProp(title, res, propFileName);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return res;
+
 	}
 
-	public void downLoadFile(String targetFN) throws IOException {
+	public void downLoadFile(String targetFN) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		String res = Props.readProp(targetFN, propFileName);
 		if (res == null) {
@@ -158,27 +181,32 @@ public class Gcloud {
 			return;
 		}
 
-		File file = service.files().get(res).execute();
-		
-		// create local directory based on folder
-//		String downLoadDirName = "Chord_" + localPortNum;
-		
-		// downloads to target downloads folder
-		String downloadDirName = dirName + Helper.DOWNLOADS;
+		File file;
+		try {
+			file = service.files().get(res).execute();
 
+			// create local directory based on folder
+			// String downLoadDirName = "Chord_" + localPortNum;
 
-		OutputStream out = new FileOutputStream(downloadDirName + "/" + file.getName());
-		Drive.Files.Get request = service.files().get(res);
-		request.executeMediaAndDownloadTo(out);
-		System.out.println("successfully download file to " + dirName + Helper.DOWNLOADS);
-//		deleteFile(targetFN);
+			// downloads to target downloads folder
+			String downloadDirName = dirName + Helper.DOWNLOADS;
+
+			OutputStream out = new FileOutputStream(downloadDirName + "/" + file.getName());
+			Drive.Files.Get request = service.files().get(res);
+			request.executeMediaAndDownloadTo(out);
+			System.out.println("successfully download file to " + dirName + Helper.DOWNLOADS);
+			// deleteFile(targetFN);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
 	public void deleteFile(String targetFN) {
 		try {
 			// String name = service.files().get(fileId).
-			
+
 			String propFileName = dirName + Helper.CLOUD_LIST;
 			String res = Props.readProp(targetFN, propFileName);
 			if (res == null) {
@@ -194,18 +222,25 @@ public class Gcloud {
 		}
 	}
 
-	private void listFiles() throws IOException {
-		FileList result = service.files().list().execute();
-		List<File> files = result.getFiles();
+	private void listFiles() {
+		FileList result;
+		try {
+			result = service.files().list().execute();
 
-		// list files
-		if (files == null || files.size() == 0) {
-			System.out.println("No files found.");
-		} else {
-			System.out.println("Files:");
-			for (File file : files) {
-				System.out.printf("%s (%s)\n", file.getName(), file.getId());
+			List<File> files = result.getFiles();
+
+			// list files
+			if (files == null || files.size() == 0) {
+				System.out.println("No files found.");
+			} else {
+				System.out.println("Files:");
+				for (File file : files) {
+					System.out.printf("%s (%s)\n", file.getName(), file.getId());
+				}
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

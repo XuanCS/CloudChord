@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,8 +65,11 @@ public class Props {
 		return res;
 	}
 
-	public static void updateProp(String key, String value, String propFileName) throws IOException {
-		FileInputStream in = new FileInputStream(propFileName);
+	public static void updateProp(String key, String value, String propFileName)  {
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
+
 		Properties props = new Properties();
 		props.load(in);
 		in.close();
@@ -74,11 +78,21 @@ public class Props {
 		props.setProperty(key, value);
 		props.store(out, null);
 		out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("successfully update to local config.property");
 	}
 
-	public static String seekProp(String target, String propFileName) throws IOException {
-		FileInputStream in = new FileInputStream(propFileName);
+	public static String seekProp(String target, String propFileName) {
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
+
 		Properties props = new Properties();
 		props.load(in);
 		in.close();
@@ -92,6 +106,15 @@ public class Props {
 			}
 		}
 		System.out.println("cannot file in local record");
+		
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
+
 	}
 }

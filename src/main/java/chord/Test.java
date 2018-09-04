@@ -15,7 +15,7 @@ public class Test {
 
 	public static void main(String[] args) throws SocketException, UnknownHostException {
 		// TODO Auto-generated method stub
-		// get local machine's ip 
+		// get local machine's ip test
 //		InetAddress local_ip = null;
 //		try {
 //			local_ip = InetAddress.getLocalHost();

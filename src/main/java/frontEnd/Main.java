@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -16,14 +17,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import chord.Gcloud;
 import chord.Node;
 import utils.Helper;
+import utils.Props;
 
 public class Main {
 
 	private JFrame frame;
 	private JTextField starter;
 	private JTextField follower;
+	private JTextField uploadField;
+	private JTextField downloadField;
 
 	private JLabel writingDone;
 	private JTextArea Information;
@@ -36,11 +41,13 @@ public class Main {
 	private static InetSocketAddress localAddress;
 
 	private String local_ip = null;
+	private String localPortNum;
+	private String DirName;
 
 	public Main() {
 		current_info = new ArrayList<String>();
 		frame = new JFrame("Cloud Chord App");
-		frame.setSize(800, 600);
+		frame.setSize(850, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		writingDone = new JLabel();
@@ -70,6 +77,12 @@ public class Main {
 
 		follower = new JTextField();
 		follower.setBounds(20, 115, 250, 25);
+		
+		uploadField = new JTextField();
+		uploadField.setBounds(550, 100, 250, 25);
+		
+		downloadField = new JTextField();
+		downloadField.setBounds(550, 170, 250, 25);
 
 		JLabel info = new JLabel("Function");
 		info.setBounds(425, 10, 150, 25);
@@ -95,18 +108,18 @@ public class Main {
 		inforBtn.setOpaque(true);
 		
 		JButton downloadBtn = new JButton("Download");
-		downloadBtn.setBounds(650, 35, 75, 35);
+		downloadBtn.setBounds(450, 170, 75, 35);
 		// submit1.setBackground(Color.GREEN);
 		downloadBtn.setOpaque(true);
 		
 		JButton uploadBtn = new JButton("Upload");
-		uploadBtn.setBounds(550, 35, 75, 35);
+		uploadBtn.setBounds(450, 100, 75, 35); 
 		// submit1.setBackground(Color.GREEN);
 		uploadBtn.setOpaque(true);
 		
 		
 		JButton quitBtn = new JButton("Quit");
-		quitBtn.setBounds(450, 100, 75, 35);
+		quitBtn.setBounds(550, 35, 75, 35);
 		// submit1.setBackground(Color.GREEN);
 		quitBtn.setOpaque(true);
 		
@@ -115,13 +128,12 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String localPortNum = starter.getText();
+				localPortNum = starter.getText();
 
 				// illegal check
 
 				startNodeAndFolder(localPortNum);
-				m_contact = m_node.getAddress();
-				
+				m_contact = m_node.getAddress();				
 				isJoinRing();
 			}
 		});
@@ -135,7 +147,7 @@ public class Main {
 				// illegal check
 				
 				
-				String localPortNum = introNode.split(" ")[0];
+				localPortNum = introNode.split(" ")[0];
 				String targetIP = introNode.split(" ")[1];
 				String targetIPPort = introNode.split(" ")[2];
 				System.out.println("port num: " + localPortNum);
@@ -169,6 +181,25 @@ public class Main {
 				}
 			}
 		});
+		
+		quitBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				// iterate all files in cloud
+				InetSocketAddress successor = m_node.getSuccessor();
+
+				// iterate all files in cloud
+				String localSock = local_ip + " " + localPortNum;
+
+				Helper.downSendAllCloudFiles(DirName, localSock, successor);
+
+				m_node.stopAllThreads();
+				System.out.println("Leaving the ring...");
+				System.exit(0);
+			}
+		});
 
 
 		uploadBtn.addActionListener(new ActionListener() {
@@ -176,9 +207,46 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String dir_name = starter.getText();
-				if (dir_name.length() == 0) {
-					return;
+				String inputFileName = uploadField.getText();
+				checkInputFile(inputFileName);
+				InetSocketAddress result = getFileSuccessor(inputFileName);
+				
+				String targetFilePath = DirName + "/" + inputFileName;
+				File targetFile = new File(targetFilePath);
+				if (!targetFile.exists()) {
+					System.err.println("cannot upload the target file, the target is not in the user's directory");
+				} else {
+					if (result.equals(localAddress)) {
+						Gcloud gc = new Gcloud(DirName);
+						gc.uploadTextFile(inputFileName);
+
+						String propFileName = DirName + Helper.RECV_FILE_LIST;
+						File propFile = new File(propFileName);
+						String sentSockStr = result.getHostString() + " " + result.getPort();
+						if (propFile.exists()) {
+							Props.updateProp(inputFileName, sentSockStr, propFileName);
+						} else {
+							Props.writeProp(inputFileName, sentSockStr, propFileName);
+						}
+					} else {
+						String localSock = local_ip + " " + localPortNum;
+						String tmp_response = Helper.sendFile(result, DirName, inputFileName, localSock, false);
+						System.out.println("sending: " + inputFileName + " success");
+						System.out.println("feedback: " + tmp_response);
+					}
+
+					// keep track of all the uploaded files from current
+					// node
+					String propFileName = DirName + Helper.SENT_FILE_LIST;
+					File propFile = new File(propFileName);
+					// System.out.println("res addr: " +
+					// result.getHostString());
+					String sentSockStr = result.getHostString() + " " + result.getPort();
+					if (propFile.exists()) {
+						Props.updateProp(inputFileName, sentSockStr, propFileName);
+					} else {
+						Props.writeProp(inputFileName, sentSockStr, propFileName);
+					}
 				}
 			}
 		});
@@ -189,10 +257,26 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String dir_name = starter.getText();
-				if (dir_name.length() == 0) {
-					return;
+				String inputFileName = downloadField.getText();
+				checkInputFile(inputFileName);
+				InetSocketAddress result = getFileSuccessor(inputFileName);
+
+				
+				String propFileName = DirName + Helper.SENT_FILE_LIST;
+				String queryRes = Props.readProp(inputFileName, propFileName);
+				if (queryRes == null) {
+					System.err.println(
+							"cannot download the target file, the target file does not belong with the current user");
+				} else {
+					if (result.equals(localAddress)) {
+						Gcloud gc = new Gcloud(DirName);
+						gc.downLoadFile(inputFileName);
+					} else {
+						String res = Helper.sendQueryFile(result, DirName, inputFileName);
+						System.out.println("feedback: " + res);
+					}
 				}
+
 			}
 		});
 		
@@ -217,6 +301,8 @@ public class Main {
 		panel.add(M_star);
 		panel.add(starter);
 		panel.add(follower);
+		panel.add(uploadField);
+		panel.add(downloadField);
 		panel.add(info);
 		panel.add(startBtn);
 		panel.add(joinBtn);
@@ -232,7 +318,7 @@ public class Main {
 	}
 	
 	private void startNodeAndFolder(String localPortNum) {
-		String DirName = Helper.createFolder(localPortNum);
+		DirName = Helper.createFolder(localPortNum);
 		String downloadDirName = Helper.createFolder(localPortNum) + Helper.DOWNLOADS;
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
@@ -250,6 +336,26 @@ public class Main {
 		System.out.println("Local IP: " + local_ip);
 		m_node.printNeighbors();
 		return true;
+	}
+	
+	private boolean checkInputFile(String fileName) {
+		long hash = Helper.hashString(fileName);
+		System.out.println("\nHash value is " + Long.toHexString(hash));
+		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
+
+		// if fail to send request, local node is disconnected, exit
+		if (result == null) {
+			System.out.println("The node your are contacting is disconnected. Now exit.");
+			System.exit(0);
+		}
+		return true;
+	}
+	
+	private InetSocketAddress getFileSuccessor(String fileName) {
+		long hash = Helper.hashString(fileName);
+		System.out.println("\nHash value is " + Long.toHexString(hash));
+		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
+		return result;
 	}
 
 	public static void main(String[] args) {
