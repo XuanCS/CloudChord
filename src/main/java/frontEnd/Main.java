@@ -37,6 +37,9 @@ public class Main {
 	public static final int button_WIDTH = 75;
 	public static final int button_HEIGHT = 35;
 	public static final int button_LG_HEIGHT = 50;
+	
+	public static final int TEXTAREA_WIDTH = 600;
+	public static final int TEXTAREA_HEIGHT = 150;
 
 	public static final int firstX_loc = 25;
 	public static final int secondX_loc = 300;
@@ -52,8 +55,11 @@ public class Main {
 	public static final int thirdLineY_loc = 175;
 	public static final int belowThirdLineY_loc = 210;
 	public static final int fourthLineY_loc = 245;
+	public static final int lastLineY_loc = 400;
 
 	private JFrame frame;
+	private JTextArea output;
+
 	private JTextField starter;
 	private JTextField follower;
 	private JTextField uploadField;
@@ -76,6 +82,12 @@ public class Main {
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
+		
+		output = new JTextArea("Empty");
+		output.setEditable(false);
+		output.setBounds(firstX_loc, lastLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
+		
+		
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
 		m_helper = new Helper();
@@ -163,6 +175,8 @@ public class Main {
 				startNodeAndFolder(localPortNum);
 				m_contact = m_node.getAddress();
 				isJoinRing();
+				
+				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip +", local port Num: " + localPortNum);
 			}
 		});
 
@@ -188,6 +202,8 @@ public class Main {
 					return;
 				}
 				isJoinRing();
+				output.setText("Joining the Chord ring\nLocal IP: " + local_ip +", local port Num: " + localPortNum);
+
 			}
 		});
 
@@ -328,6 +344,7 @@ public class Main {
 		panel.add(downloadBtn);
 		panel.add(quitBtn);
 		panel.add(clear);
+		panel.add(output);
 
 		frame.add(panel);
 		frame.setVisible(true);
