@@ -176,7 +176,7 @@ public class Main {
 				m_contact = m_node.getAddress();
 				isJoinRing();
 				
-				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip +", local port Num: " + localPortNum);
+				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip +", Local Port Num: " + localPortNum + "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 			}
 		});
 
@@ -202,7 +202,7 @@ public class Main {
 					return;
 				}
 				isJoinRing();
-				output.setText("Joining the Chord ring\nLocal IP: " + local_ip +", local port Num: " + localPortNum);
+				output.setText("Joining the Chord ring\nLocal IP: " + local_ip +", Local Port Num: " + localPortNum + "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 
 			}
 		});
@@ -233,6 +233,7 @@ public class Main {
 				Helper.downSendAllCloudFiles(DirName, localSock, successor);
 
 				m_node.stopAllThreads();
+				output.setText("send out all files from user's cloud account, Leaving the ring...");
 				System.out.println("Leaving the ring...");
 				System.exit(0);
 			}
@@ -264,11 +265,13 @@ public class Main {
 						} else {
 							Props.writeProp(inputFileName, sentSockStr, propFileName);
 						}
+						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) + "\nsuccesfully upload file: " + inputFileName);
 					} else {
 						String localSock = local_ip + " " + localPortNum;
 						String tmp_response = Helper.sendFile(result, DirName, inputFileName, localSock, false);
 						System.out.println("sending: " + inputFileName + " success");
 						System.out.println("feedback: " + tmp_response);
+						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) + "\nsuccesfully send file to successor cloud account, and upload file: " + inputFileName);
 					}
 
 					// keep track of all the uploaded files from current
@@ -304,9 +307,13 @@ public class Main {
 					if (result.equals(localAddress)) {
 						Gcloud gc = new Gcloud(DirName);
 						gc.downLoadFile(inputFileName);
+						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) +"\nsuccesfully download file: " + inputFileName);
+
 					} else {
 						String res = Helper.sendQueryFile(result, DirName, inputFileName);
 						System.out.println("feedback: " + res);
+						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) +"\nsuccesfully download file: " + inputFileName + " from target cloud account");
+
 					}
 				}
 

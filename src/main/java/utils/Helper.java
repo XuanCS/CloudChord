@@ -171,6 +171,13 @@ public class Helper {
 		long hash = hashSocketAddress(addr);
 		return (longTo8DigitHex(hash) + " (" + hash * 100 / Helper.getPowerOfTwo(32) + "%)");
 	}
+	
+	public static String hexFileNameAndPosition(String fileName) {
+		int i = fileName.hashCode();
+		Long hash = hashHashCode(i);
+		return (longTo8DigitHex(hash) + " (" + hash * 100 / Helper.getPowerOfTwo(32) + "%)");
+
+	}
 
 	/**
 	 * 
