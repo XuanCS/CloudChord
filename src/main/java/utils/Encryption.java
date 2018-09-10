@@ -1,10 +1,5 @@
 package utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -18,12 +13,14 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Encryption {
 
-	public static final String KeyFileName = "AESK.txt";
-	public static void encrypt(String fileName) {
+	public static final String KeyFileName = "_AESK.txt";
+	public static final String EncodePrefix = "enc_";
+	
+	public static void encrypt(String fileName, String encodedFileName) {
 		// readFile from FNAME
 		try {
 			byte[] plainTextArr = FileUtils.readFile(fileName);
-			byte[] AESK = genStoreKey();
+			byte[] AESK = genStoreKey(encodedFileName);
 
 			// encrypt plainTextArr
 			Cipher cipherAES = Cipher.getInstance("AES");
@@ -32,7 +29,6 @@ public class Encryption {
 			byte[] finalEncFile = cipherAES.doFinal(plainTextArr);
 
 			// save to file
-			String encodedFileName = "enc_" + fileName;
 			FileUtils.writeFile(encodedFileName, finalEncFile);
 			System.out.println("finish encrypt " + fileName);
 
@@ -54,10 +50,10 @@ public class Encryption {
 		}
 	}
 
-	public static void decrpt(String fileName) {
+	public static void decrpt(String encFileName, String oriFileName) {
 		try {
-			byte[] encodedFileByte = FileUtils.readFile(fileName);			
-			byte[] fileAESKbyte = FileUtils.readFile(KeyFileName);
+			byte[] encodedFileByte = FileUtils.readFile(encFileName);			
+			byte[] fileAESKbyte = FileUtils.readFile(encFileName + KeyFileName);
 
 			// decipher AES
 			Cipher deCipherAES2 = Cipher.getInstance("AES");
@@ -65,9 +61,9 @@ public class Encryption {
 			deCipherAES2.init(Cipher.DECRYPT_MODE, key128AES2);
 			byte[] fileTarget = deCipherAES2.doFinal(encodedFileByte);
 			
-			String preFileName = fileName.split("_")[1];
-			FileUtils.writeFile(preFileName, fileTarget);
-			System.out.println("finish decrypt " + fileName);
+//			String preFileName = fileName.split("_")[1];
+			FileUtils.writeFile(oriFileName, fileTarget);
+			System.out.println("finish decrypt " + oriFileName);
 
 			
 		} catch (NoSuchAlgorithmException e) {
@@ -90,26 +86,12 @@ public class Encryption {
 
 
 	
-	private static byte[] genStoreKey() {
+	private static byte[] genStoreKey(String fileName) {
 		// randomly pick AES key
 		SecureRandom sr = new SecureRandom();
 		byte[] AESK = new byte[16];
 		sr.nextBytes(AESK);
-
-		// store the key
-		FileOutputStream fosAESK;
-		try {
-			fosAESK = new FileOutputStream(KeyFileName);
-	
-		fosAESK.write(AESK);
-		fosAESK.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		FileUtils.writeFile(fileName + KeyFileName, AESK);
 		return AESK;
 	}
 

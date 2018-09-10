@@ -70,4 +70,10 @@ public class FileUtils {
 		}
 		return plainTextArr;
 	}
+	
+	public static void duplicateFile(String fileName, String cpFileName) {
+		byte[] byteArr = readFile(fileName);
+		writeFile(cpFileName, byteArr);
+		System.out.println("Finish duplication of file: " + fileName);
+	}
 }
