@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import fileSys.FileMsg;
 import fileSys.SigMsg;
+import utils.FileUtils;
 import utils.Helper;
 
 /**
@@ -113,19 +114,7 @@ public class Talker implements Runnable {
 			ret = "TEST_SUCC";
 		} else if (request.startsWith("FILE")) {
 			ret = "FINISH_RECV";
-		} else if (request.startsWith("UPLOAD")) {
-//			String upfName = request.split("#")[1];
-//			
-//			String hostAndPort = talkSocket.getInetAddress().getHostAddress();
-//			hostAndPort = hostAndPort + " " + talkSocket.getPort();
-//
-//			String propFileName = dirName + Helper.RECV_FILE_LIST;
-//			File propFile = new File(propFileName);
-//			if (propFile.exists()) {
-//				Helper.updateProp(upfName, hostAndPort, propFileName);
-//			} else {
-//				Helper.writeProp(upfName, hostAndPort, propFileName);
-//			}		
+		} else if (request.startsWith("UPLOAD")) {	
 			ret = "FINISH_UPLOAD_RECV";
 		}	
 		else if (request.startsWith("DOWNLOAD")) {
@@ -136,9 +125,7 @@ public class Talker implements Runnable {
 				System.out.print("" + "Downloading File does not exit");
 				 return ret;
 			}
-			// else {
-			// System.out.println("success");
-			// }
+
 			byte[] myByteArray = new byte[(int) myFile.length()];
 			FileInputStream fis = new FileInputStream(myFile);
 			BufferedInputStream bis = new BufferedInputStream(fis);
@@ -148,7 +135,7 @@ public class Talker implements Runnable {
 			System.out.println("Sending Querying File " + downfName + "(" + myByteArray.length + " bytes)");
 
 			
-			FileMsg msg = new FileMsg(3, "FILE");
+			FileMsg msg = new FileMsg(Helper.FILESOCK_SIG, Helper.fileCmd);
 			msg.setFileName(downfName);			
 			int fileLen = (int) myFile.length();
 			msg.setFileSize(fileLen);
@@ -156,7 +143,7 @@ public class Talker implements Runnable {
 			
 			outputStream.writeObject(msg);
 			ret = "FINISH_SENDING_DOWNFILE";
-			Helper.deletelocalFile(dirName + Helper.DOWNLOADS, downfName);
+			FileUtils.deletelocalFile(dirName + Helper.DOWNLOADS, downfName);
 
 
 		}

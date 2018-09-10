@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 
 import chord.Gcloud;
 import chord.Node;
+import utils.FileUtils;
 import utils.Helper;
 import utils.Props;
 
@@ -358,8 +359,8 @@ public class Main {
 	}
 
 	private void startNodeAndFolder(String localPortNum) {
-		DirName = Helper.createFolder(localPortNum);
-		String downloadDirName = Helper.createFolder(localPortNum) + Helper.DOWNLOADS;
+		DirName = FileUtils.createFolder(localPortNum);
+		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);

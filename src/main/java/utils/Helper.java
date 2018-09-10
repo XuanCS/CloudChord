@@ -53,6 +53,13 @@ public class Helper {
 	public static final String CLOUD_LIST = "/cloud.props";
 	public static final String CLIENT_SECRET = "client_secret.json";
 
+	public static final int CHORD_SIG = 0;
+	public static final int UPLOAD_SIG = 1;
+	public static final int DOWNLOAD_SIG = 2;
+	public static final int FILESOCK_SIG = 3;
+
+	public static final String fileCmd = "FILE";
+
 	/**
 	 * Constructor
 	 */
@@ -171,7 +178,7 @@ public class Helper {
 		long hash = hashSocketAddress(addr);
 		return (longTo8DigitHex(hash) + " (" + hash * 100 / Helper.getPowerOfTwo(32) + "%)");
 	}
-	
+
 	public static String hexFileNameAndPosition(String fileName) {
 		int i = fileName.hashCode();
 		Long hash = hashHashCode(i);
@@ -274,22 +281,16 @@ public class Helper {
 			return null;
 
 		Socket talkSocket = null;
-
-		// try to open talkSocket, output request to this socket
-		// return null if fail to do so
 		try {
 			talkSocket = new Socket(server.getAddress(), server.getPort());
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
-			SigMsg msg = new SigMsg(0, req);
+			SigMsg msg = new SigMsg(CHORD_SIG, req);
 			outputStream.writeObject(msg);
 
 		} catch (IOException e) {
-			// System.out.println("\nCannot send request to
-			// "+server.toString()+"\nRequest is: "+req+"\n");
 			return null;
 		}
 
-		// sleep for a short time, waiting for response
 		try {
 			Thread.sleep(60);
 		} catch (InterruptedException e) {
@@ -312,152 +313,6 @@ public class Helper {
 			throw new RuntimeException("Cannot close socket", e);
 		}
 		return response;
-	}
-
-	/**
-	 * Send File to server and read response
-	 * 
-	 * @param server
-	 * @param request
-	 * @return response, might be null if (1) invalid input (2) cannot open
-	 *         socket or write request to it (3) response read by
-	 *         inputStreamToString() is null
-	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock,
-			boolean fromDownFolder) {
-		// invalid input
-		if (server == null || fileName == null)
-			return null;
-
-		Socket talkSocket = null;
-
-		// try to open talkSocket, output request to this socket
-		// return null if fail to do so
-		try {
-			talkSocket = new Socket(server.getAddress(), server.getPort());
-			File myFile = new File(dirName + "/" + fileName);
-			if (fromDownFolder) {
-				myFile = new File(dirName + Helper.DOWNLOADS + "/" + fileName);
-			}
-
-			if (!myFile.exists()) {
-				System.out.print("" + "File does not exit");
-				// return null;
-			}
-			// else {
-			// System.out.println("success");
-			// }
-			byte[] myByteArray = new byte[(int) myFile.length()];
-			FileInputStream fis = new FileInputStream(myFile);
-			BufferedInputStream bis = new BufferedInputStream(fis);
-			bis.read(myByteArray);
-
-			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
-			System.out.println("Sending " + fileName + "(" + myByteArray.length + " bytes)");
-
-			FileMsg msg = new FileMsg(1, "FILE");
-			msg.setFileName(fileName);
-			int fileLen = (int) myFile.length();
-			msg.setFileSize(fileLen);
-			msg.setContents(myByteArray);
-			if (fromDownFolder) {
-				String propFileName = dirName + Helper.RECV_FILE_LIST;
-				String homeSockInfo = Props.seekProp(fileName, propFileName);
-				msg.setFileSockInfo(homeSockInfo);
-			} else {
-				msg.setFileSockInfo(localSock);
-			}
-			// msg.setFilePortNum(dirName);
-			// msg.setDirName(dirName);
-
-			outputStream.writeObject(msg);
-
-			if (fromDownFolder) {
-				String downPath = dirName + Helper.DOWNLOADS;
-				deletelocalFile(downPath, fileName);
-			}
-
-		} catch (IOException e) {
-			// System.out.println("\nCannot send request to
-			// "+server.toString()+"\nRequest is: "+req+"\n");
-			return null;
-		}
-
-		// sleep for a short time, waiting for response
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		// get input stream, try to read something from it
-		ObjectInputStream input = null;
-		try {
-			input = new ObjectInputStream(talkSocket.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String response = Helper.inputStreamToString(input, dirName);
-
-		// try to close socket
-		try {
-			talkSocket.close();
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot close socket", e);
-		}
-		return response;
-	}
-
-	/**
-	 * Send File to server and read response
-	 * 
-	 * @param server
-	 * @param request
-	 * @return response, might be null if (1) invalid input (2) cannot open
-	 *         socket or write request to it (3) response read by
-	 *         inputStreamToString() is null
-	 */
-	public static String sendQueryFile(InetSocketAddress server, String dirName, String fileName) {
-		// invalid input
-		if (server == null || fileName == null)
-			return null;
-
-		Socket talkSocket = null;
-
-		// try to open talkSocket, output request to this socket
-		// return null if fail to do so
-		try {
-			talkSocket = new Socket(server.getAddress(), server.getPort());
-			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
-
-			FileMsg msg = new FileMsg(2, "FILE");
-			msg.setFileName(fileName);
-			outputStream.writeObject(msg);
-
-			System.out.println("sending Query Msg: " + fileName + " success");
-
-		} catch (IOException e) {
-			// System.out.println("\nCannot send request to
-			// "+server.toString()+"\nRequest is: "+req+"\n");
-		}
-
-		// get input stream, try to read something from it
-		ObjectInputStream input = null;
-		try {
-			input = new ObjectInputStream(talkSocket.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String response = Helper.inputStreamToString(input, dirName);
-
-		// try to close socket
-		try {
-			talkSocket.close();
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot close socket", e);
-		}
-		return response;
-
 	}
 
 	/**
@@ -513,15 +368,117 @@ public class Helper {
 	}
 
 	/**
-	 * Read one line from input stream
+	 * Send File to server and read response
 	 * 
-	 * @param in:
-	 *            input steam
-	 * @return line, might be null if: (1) invalid input (2) cannot read from
-	 *         input stream
-	 * @throws ClassNotFoundException
-	 * @throws IOException
 	 */
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock,
+			boolean fromDownFolder) {
+		// invalid input
+		if (server == null || fileName == null)
+			return null;
+
+		Socket talkSocket = null;
+		try {
+			talkSocket = new Socket(server.getAddress(), server.getPort());
+			String localFileName = dirName + "/" + fileName;
+			String downLoadFileName = dirName + Helper.DOWNLOADS + "/" + fileName;
+			File myFile = null;
+			byte[] myByteArray = null;
+
+			// read file from local or download folder
+			if (fromDownFolder) {
+				myFile = new File(downLoadFileName);
+				if (!myFile.exists()) {
+					System.out.print(downLoadFileName + "File does not exit");
+				}
+				myByteArray = FileUtils.readFile(downLoadFileName);
+
+			} else {
+				myFile = new File(localFileName);
+				if (!myFile.exists()) {
+					System.out.print(localFileName + " does not exit");
+				}
+				myByteArray = FileUtils.readFile(localFileName);
+			}
+
+			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
+			System.out.println("Sending " + fileName);
+
+			FileMsg msg = prepUploadMsg(dirName, fileName, localSock, fromDownFolder, myFile, myByteArray);
+			outputStream.writeObject(msg);
+
+			if (fromDownFolder) {
+				String downPath = dirName + Helper.DOWNLOADS;
+				FileUtils.deletelocalFile(downPath, fileName);
+			}
+
+		} catch (IOException e) {
+			return null;
+		}
+
+		// sleep for a short time, waiting for response
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		// get input stream, try to read something from it
+		ObjectInputStream input = null;
+		try {
+			input = new ObjectInputStream(talkSocket.getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String response = Helper.inputStreamToString(input, dirName);
+
+		try {
+			talkSocket.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot close socket", e);
+		}
+		return response;
+	}
+
+	public static String sendQueryFile(InetSocketAddress server, String dirName, String fileName) {
+		// invalid input
+		if (server == null || fileName == null)
+			return null;
+
+		Socket talkSocket = null;
+
+		// try to open talkSocket, output request to this socket
+		// return null if fail to do so
+		try {
+			talkSocket = new Socket(server.getAddress(), server.getPort());
+			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
+			FileMsg msg = new FileMsg(DOWNLOAD_SIG, Helper.fileCmd);
+			msg.setFileName(fileName);
+			outputStream.writeObject(msg);
+
+			System.out.println("sending Query Msg: " + fileName + " success");
+
+		} catch (IOException e) {
+		}
+
+		// get input stream, try to read something from it
+		ObjectInputStream input = null;
+		try {
+			input = new ObjectInputStream(talkSocket.getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String response = Helper.inputStreamToString(input, dirName);
+
+		try {
+			talkSocket.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot close socket", e);
+		}
+		return response;
+
+	}
+
 	public static String inputStreamToString(ObjectInputStream inStream, String dirName) {
 
 		// invalid input
@@ -534,89 +491,39 @@ public class Helper {
 		try {
 			msg = (Msg) inStream.readObject();
 			int type = msg.getType();
-			if (type == 0) {
+			if (type == CHORD_SIG) {
 				SigMsg sigMsg = (SigMsg) msg;
 				String sigCmd = sigMsg.getCmd();
 				res = sigCmd;
-				// System.out.println("Object received: " + sigCmd);
-
-			} else if (type == 1) {
-				// String prefix = "recv_";
-				// String prefix = "";
+			} else if (type == UPLOAD_SIG) {
 				if (dirName == null) {
 					System.out.println("need to inialize local directory first");
 				}
-
-				// receive the target file
-				FileMsg file = (FileMsg) msg;
-				String fileCmd = file.getCmd();
-				int fileSize = file.getFileSize();
-				String fileName = file.getFileName();
-				byte[] contents = file.getContents();
-				String fileSockInfo = file.getFileSockInfo();
-
-				String recvFileName = fileName;
-				FileOutputStream fos = new FileOutputStream(dirName + "/" + recvFileName);
-				fos.write(contents);
-
-				System.out.println("file size: " + fileSize);
-				System.out.println("finished writing to file");
-				System.out.println("Object received: " + msg);
-
-				// save into RECV_LIST
-
-				String propFileName = dirName + Helper.RECV_FILE_LIST;
-				File propFile = new File(propFileName);
-				if (propFile.exists()) {
-					Props.updateProp(recvFileName, fileSockInfo, propFileName);
-				} else {
-					Props.writeProp(recvFileName, fileSockInfo, propFileName);
-				}
+				String fileName = uploadFileInfo(msg, dirName);
 
 				// upload to cloud
 				System.out.println("uploading to cloud...");
-
 				Gcloud gc = new Gcloud(dirName);
 				gc.uploadTextFile(fileName);
-				deletelocalFile(dirName, fileName);
-
+				FileUtils.deletelocalFile(dirName, fileName);
 				res = fileCmd;
-
-			} else if (type == 2) {
+			} else if (type == DOWNLOAD_SIG) {
 				if (dirName == null) {
 					System.out.println("need to inialize local directory first");
 				}
-
+				// retrieve file info
 				FileMsg file = (FileMsg) msg;
 				String fileName = file.getFileName();
 				String downFileName = fileName;
 
 				System.out.println("downloading from cloud...");
-
+				// download from local cloud
 				Gcloud gc = new Gcloud(dirName);
 				gc.downLoadFile(fileName);
-
 				res = "DOWNLOAD#" + downFileName;
-
-				// Thread.sleep(2000);
-
-			} else if (type == 3) {
-
-				FileMsg file = (FileMsg) msg;
-				String fileCmd = file.getCmd();
-				int fileSize = file.getFileSize();
-				String fileName = file.getFileName();
-				byte[] contents = file.getContents();
-
-				String recvFileName = fileName;
-				FileOutputStream fos = new FileOutputStream(dirName + Helper.DOWNLOADS + "/" + recvFileName);
-				fos.write(contents);
-
-				System.out.println("file size: " + fileSize);
-				System.out.println("finished writing to file");
-				System.out.println("Object received: " + msg);
+			} else if (type == FILESOCK_SIG) {
+				fileSockInfo(msg, dirName);
 				res = fileCmd;
-
 			} else {
 				System.out.println("ERROR CMD, please Resend");
 				return null;
@@ -628,39 +535,7 @@ public class Helper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
 		return res;
-	}
-
-	public static void deletelocalFile(String dirName, String fileName) {
-
-		File f = new File(dirName + "/" + fileName);
-		if (!f.exists()) {
-			System.out.println("File " + fileName + " does not exist");
-			return;
-		}
-		if (f.delete()) {
-			System.out.println(f.getName() + " is deleted!");
-		} else {
-			System.out.println("Delete operation is failed.");
-		}
-	}
-
-	public static String createFolder(String localChordNum) {
-		String DirName = "Chord_" + localChordNum;
-
-		File dirFileName = new File(DirName);
-		if (!dirFileName.exists()) {
-			if (dirFileName.mkdir()) {
-				System.out.println("Directory is created!");
-			} else {
-				System.out.println("Failed to create directory!");
-			}
-		}
-		return DirName;
 	}
 
 	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor) {
@@ -690,6 +565,59 @@ public class Helper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private static String uploadFileInfo(Msg msg, String dirName) {
+		// receive the target file
+		FileMsg file = (FileMsg) msg;
+		String fileName = file.getFileName();
+		byte[] contents = file.getContents();
+		String fileSockInfo = file.getFileSockInfo();
+
+		String recvFileName = dirName + "/" + fileName;
+		FileUtils.writeFile(recvFileName, contents);
+		System.out.println("Object received: " + msg);
+
+		// save into RECV_LIST
+		String propFileName = dirName + Helper.RECV_FILE_LIST;
+		File propFile = new File(propFileName);
+		if (propFile.exists()) {
+			Props.updateProp(fileName, fileSockInfo, propFileName);
+		} else {
+			Props.writeProp(fileName, fileSockInfo, propFileName);
+		}
+		return fileName;
+	}
+
+	private static void fileSockInfo(Msg msg, String dirName) {
+		FileMsg file = (FileMsg) msg;
+		String fileName = file.getFileName();
+		byte[] contents = file.getContents();
+
+		String recvFileName = dirName + Helper.DOWNLOADS + "/" + fileName;
+		FileUtils.writeFile(recvFileName, contents);
+		;
+
+		System.out.println("finished writing to file");
+		System.out.println("Object received: " + msg);
+	}
+
+	private static FileMsg prepUploadMsg(String dirName, String fileName, String localSock, boolean fromDownFolder,
+			File myFile, byte[] myByteArray) {
+
+		FileMsg msg = new FileMsg(UPLOAD_SIG, Helper.fileCmd);
+		msg.setFileName(fileName);
+		int fileLen = (int) myFile.length();
+		msg.setFileSize(fileLen);
+		msg.setContents(myByteArray);
+		if (fromDownFolder) {
+			String propFileName = dirName + Helper.RECV_FILE_LIST;
+			String homeSockInfo = Props.seekProp(fileName, propFileName);
+			msg.setFileSockInfo(homeSockInfo);
+		} else {
+			msg.setFileSockInfo(localSock);
+		}
+		return msg;
 	}
 
 }

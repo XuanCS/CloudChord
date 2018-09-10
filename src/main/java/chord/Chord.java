@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+import utils.FileUtils;
 import utils.Helper;
 import utils.Props;
 
@@ -60,8 +61,8 @@ public class Chord {
 		}
 
 		// create local and downloads directory based on folder
-		String DirName = Helper.createFolder(Integer.toString(localPortNum));
-		String downloadDirName = Helper.createFolder(Integer.toString(localPortNum) + Helper.DOWNLOADS);
+		String DirName = FileUtils.createFolder(Integer.toString(localPortNum));
+		String downloadDirName = FileUtils.createFolder(Integer.toString(localPortNum) + Helper.DOWNLOADS);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
