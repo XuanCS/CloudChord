@@ -380,36 +380,24 @@ public class Helper {
 		Socket talkSocket = null;
 		try {
 			talkSocket = new Socket(server.getAddress(), server.getPort());
-			String localFileName = dirName + "/" + fileName;
-			String downLoadFileName = dirName + Helper.DOWNLOADS + "/" + fileName;
-			File myFile = null;
+			String downLoadDirName = dirName + Helper.DOWNLOADS;
 			byte[] myByteArray = null;
 
 			// read file from local or download folder
 			if (fromDownFolder) {
-				myFile = new File(downLoadFileName);
-				if (!myFile.exists()) {
-					System.out.print(downLoadFileName + "File does not exit");
-				}
-				myByteArray = FileUtils.readFile(downLoadFileName);
-
+				myByteArray = FileUtils.readFile(fileName, downLoadDirName);
 			} else {
-				myFile = new File(localFileName);
-				if (!myFile.exists()) {
-					System.out.print(localFileName + " does not exit");
-				}
-				myByteArray = FileUtils.readFile(localFileName);
+				myByteArray = FileUtils.readFile(fileName, dirName);
 			}
-
+			int fileSize = myByteArray.length;
+			
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
 			System.out.println("Sending " + fileName);
 
-			FileMsg msg = prepUploadMsg(dirName, fileName, localSock, fromDownFolder, myFile, myByteArray);
+			FileMsg msg = prepUploadMsg(dirName, fileName, localSock, fromDownFolder, fileSize, myByteArray);
 			outputStream.writeObject(msg);
-
 			if (fromDownFolder) {
-				String downPath = dirName + Helper.DOWNLOADS;
-				FileUtils.deletelocalFile(downPath, fileName);
+				FileUtils.deletelocalFile(downLoadDirName, fileName);
 			}
 
 		} catch (IOException e) {
@@ -539,9 +527,7 @@ public class Helper {
 	}
 
 	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor) {
-
 		String propFileName = dirName + Helper.CLOUD_LIST;
-
 		FileInputStream in;
 		try {
 			in = new FileInputStream(propFileName);
@@ -574,8 +560,7 @@ public class Helper {
 		byte[] contents = file.getContents();
 		String fileSockInfo = file.getFileSockInfo();
 
-		String recvFileName = dirName + "/" + fileName;
-		FileUtils.writeFile(recvFileName, contents);
+		FileUtils.writeFile(fileName, dirName, contents);
 		System.out.println("Object received: " + msg);
 
 		// save into RECV_LIST
@@ -594,8 +579,8 @@ public class Helper {
 		String fileName = file.getFileName();
 		byte[] contents = file.getContents();
 
-		String recvFileName = dirName + Helper.DOWNLOADS + "/" + fileName;
-		FileUtils.writeFile(recvFileName, contents);
+		String downLoadDirName = dirName + Helper.DOWNLOADS;
+		FileUtils.writeFile(fileName, downLoadDirName, contents);
 		;
 
 		System.out.println("finished writing to file");
@@ -603,12 +588,11 @@ public class Helper {
 	}
 
 	private static FileMsg prepUploadMsg(String dirName, String fileName, String localSock, boolean fromDownFolder,
-			File myFile, byte[] myByteArray) {
+			int fileSize, byte[] myByteArray) {
 
 		FileMsg msg = new FileMsg(UPLOAD_SIG, Helper.fileCmd);
 		msg.setFileName(fileName);
-		int fileLen = (int) myFile.length();
-		msg.setFileSize(fileLen);
+		msg.setFileSize(fileSize);
 		msg.setContents(myByteArray);
 		if (fromDownFolder) {
 			String propFileName = dirName + Helper.RECV_FILE_LIST;

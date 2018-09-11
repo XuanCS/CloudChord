@@ -7,21 +7,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplitFile {
-	public static void join(String fileName) {
+	public static void join(String fileName, String dirName) {
 		long leninfile = 0, leng = 0;
 		int count = 1, data = 0;
 		try {
-			File filename = new File(fileName);
-			// RandomAccessFile outfile = new RandomAccessFile(filename,"rw");
-
+			String localFileName = FileUtils.getLocalFileName(fileName, dirName);
+			File filename = new File(localFileName);
 			OutputStream outfile = new BufferedOutputStream(new FileOutputStream(filename));
 			while (true) {
 				filename = new File(fileName + count + ".sp");
 				if (filename.exists()) {
-					// RandomAccessFile infile = new
-					// RandomAccessFile(filename,"r");
 					InputStream infile = new BufferedInputStream(new FileInputStream(filename));
 					data = infile.read();
 					while (data != -1) {
@@ -42,18 +41,19 @@ public class SplitFile {
 		}
 	}
 
-	public static void split(String fileName, long splitlen) {
+	public static List<String> split(String fileName, String dirName, long splitlen) {
 		long leninfile = 0, leng = 0;
 		int count = 1, data;
+		List<String> splitList = new ArrayList<String>();
 		try {
-			File filename = new File(fileName);
-			// RandomAccessFile infile = new RandomAccessFile(filename, "r");
+			String localFileName = FileUtils.getLocalFileName(fileName, dirName);
+			File filename = new File(localFileName);
 			InputStream infile = new BufferedInputStream(new FileInputStream(filename));
 			data = infile.read();
 			while (data != -1) {
-				filename = new File(fileName + count + ".sp");
-				// RandomAccessFile outfile = new RandomAccessFile(filename,
-				// "rw");
+				String splitFileName = fileName + count + ".sp";
+				filename = new File(splitFileName);
+				splitList.add(splitFileName);
 				OutputStream outfile = new BufferedOutputStream(new FileOutputStream(filename));
 				while (data != -1 && leng < splitlen) {
 					outfile.write(data);
@@ -64,10 +64,11 @@ public class SplitFile {
 				leng = 0;
 				outfile.close();
 				count++;
-			}
+			}		
 			System.out.println("finish spliting " + fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return splitList;
 	}
 }

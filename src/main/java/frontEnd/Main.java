@@ -1,14 +1,13 @@
 package frontEnd;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -19,9 +18,11 @@ import javax.swing.JTextField;
 
 import chord.Gcloud;
 import chord.Node;
+import utils.Encryption;
 import utils.FileUtils;
 import utils.Helper;
 import utils.Props;
+import utils.SplitFile;
 
 public class Main {
 
@@ -77,6 +78,8 @@ public class Main {
 	private String local_ip = null;
 	private String localPortNum;
 	private String DirName;
+	private long blockLen = 1024 * 2;
+
 
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
@@ -241,53 +244,58 @@ public class Main {
 		});
 
 		uploadBtn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				// get file info, encryption and split file
 				String inputFileName = uploadField.getText();
 				checkInputFile(inputFileName);
-				InetSocketAddress result = getFileSuccessor(inputFileName);
+				
+				String splitFile = inputFileName;
+//				String encFileName = Encryption.EncodePrefix + inputFileName;
+//				Encryption.encrypt(inputFileName, DirName, encFileName);
+//				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
 
-				String targetFilePath = DirName + "/" + inputFileName;
-				File targetFile = new File(targetFilePath);
-				if (!targetFile.exists()) {
-					illegalUpload.setText("the target file is not in the user's directory");
-				} else {
-					if (result.equals(localAddress)) {
-						Gcloud gc = new Gcloud(DirName);
-						gc.uploadTextFile(inputFileName);
+				// send out the each of file
+//				for (String splitFile : splitList) {								
+					InetSocketAddress result = getFileSuccessor(splitFile);
+					String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
+					File targetFile = new File(targetFilePath);
+					if (!targetFile.exists()) {
+						illegalUpload.setText("the target file is not in the user's directory");
+					} else {
+						if (result.equals(localAddress)) {
+							Gcloud gc = new Gcloud(DirName);
+							gc.uploadTextFile(splitFile);
 
-						String propFileName = DirName + Helper.RECV_FILE_LIST;
+							String propFileName = DirName + Helper.RECV_FILE_LIST;
+							File propFile = new File(propFileName);
+							String sentSockStr = result.getHostString() + " " + result.getPort();
+							if (propFile.exists()) {
+								Props.updateProp(splitFile, sentSockStr, propFileName);
+							} else {
+								Props.writeProp(splitFile, sentSockStr, propFileName);
+							}
+							output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully upload file: " + splitFile);
+						} else {
+							String localSock = local_ip + " " + localPortNum;
+							String tmp_response = Helper.sendFile(result, DirName, splitFile, localSock, false);
+							System.out.println("sending: " + splitFile + " success");
+							System.out.println("feedback: " + tmp_response);
+							output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully send file to successor cloud account, and upload file: " + splitFile);
+						}
+
+						// keep track of all the uploaded files from current
+						String propFileName = DirName + Helper.SENT_FILE_LIST;
 						File propFile = new File(propFileName);
 						String sentSockStr = result.getHostString() + " " + result.getPort();
 						if (propFile.exists()) {
-							Props.updateProp(inputFileName, sentSockStr, propFileName);
+							Props.updateProp(splitFile, sentSockStr, propFileName);
 						} else {
-							Props.writeProp(inputFileName, sentSockStr, propFileName);
+							Props.writeProp(splitFile, sentSockStr, propFileName);
 						}
-						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) + "\nsuccesfully upload file: " + inputFileName);
-					} else {
-						String localSock = local_ip + " " + localPortNum;
-						String tmp_response = Helper.sendFile(result, DirName, inputFileName, localSock, false);
-						System.out.println("sending: " + inputFileName + " success");
-						System.out.println("feedback: " + tmp_response);
-						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) + "\nsuccesfully send file to successor cloud account, and upload file: " + inputFileName);
 					}
-
-					// keep track of all the uploaded files from current
-					// node
-					String propFileName = DirName + Helper.SENT_FILE_LIST;
-					File propFile = new File(propFileName);
-					// System.out.println("res addr: " +
-					// result.getHostString());
-					String sentSockStr = result.getHostString() + " " + result.getPort();
-					if (propFile.exists()) {
-						Props.updateProp(inputFileName, sentSockStr, propFileName);
-					} else {
-						Props.writeProp(inputFileName, sentSockStr, propFileName);
-					}
-				}
+//				}
+		
 			}
 		});
 

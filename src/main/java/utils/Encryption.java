@@ -13,14 +13,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Encryption {
 
+
 	public static final String KeyFileName = "_AESK.txt";
 	public static final String EncodePrefix = "enc_";
 	
-	public static void encrypt(String fileName, String encodedFileName) {
+	public static void encrypt(String fileName, String dirName, String encodedFileName) {
 		// readFile from FNAME
 		try {
-			byte[] plainTextArr = FileUtils.readFile(fileName);
-			byte[] AESK = genStoreKey(encodedFileName);
+			byte[] plainTextArr = FileUtils.readFile(fileName, dirName);
+			byte[] AESK = genStoreKey(encodedFileName, dirName);
 
 			// encrypt plainTextArr
 			Cipher cipherAES = Cipher.getInstance("AES");
@@ -29,7 +30,7 @@ public class Encryption {
 			byte[] finalEncFile = cipherAES.doFinal(plainTextArr);
 
 			// save to file
-			FileUtils.writeFile(encodedFileName, finalEncFile);
+			FileUtils.writeFile(encodedFileName, dirName, finalEncFile);
 			System.out.println("finish encrypt " + fileName);
 
 		} catch (NoSuchAlgorithmException e) {
@@ -50,10 +51,12 @@ public class Encryption {
 		}
 	}
 
-	public static void decrpt(String encFileName, String oriFileName) {
+	public static void decrpt(String encFileName, String dirName, String oriFileName) {
 		try {
-			byte[] encodedFileByte = FileUtils.readFile(encFileName);			
-			byte[] fileAESKbyte = FileUtils.readFile(encFileName + KeyFileName);
+			String localFileName = FileUtils.getLocalFileName(encFileName, dirName);
+			byte[] encodedFileByte = FileUtils.readFile(localFileName, dirName);	
+			String literalFileName = getBaseFileName(encFileName);
+			byte[] fileAESKbyte = FileUtils.readFile(literalFileName + KeyFileName, dirName);
 
 			// decipher AES
 			Cipher deCipherAES2 = Cipher.getInstance("AES");
@@ -61,8 +64,7 @@ public class Encryption {
 			deCipherAES2.init(Cipher.DECRYPT_MODE, key128AES2);
 			byte[] fileTarget = deCipherAES2.doFinal(encodedFileByte);
 			
-//			String preFileName = fileName.split("_")[1];
-			FileUtils.writeFile(oriFileName, fileTarget);
+			FileUtils.writeFile(oriFileName, dirName, fileTarget);
 			System.out.println("finish decrypt " + oriFileName);
 
 			
@@ -86,13 +88,19 @@ public class Encryption {
 
 
 	
-	private static byte[] genStoreKey(String fileName) {
+	private static byte[] genStoreKey(String fileName, String dirName) {
 		// randomly pick AES key
 		SecureRandom sr = new SecureRandom();
 		byte[] AESK = new byte[16];
 		sr.nextBytes(AESK);
-		FileUtils.writeFile(fileName + KeyFileName, AESK);
+		String baseFileName = getBaseFileName(fileName);
+		FileUtils.writeFile(baseFileName + KeyFileName, dirName, AESK);
 		return AESK;
+	}
+	
+	private static String getBaseFileName(String fileName) {
+		String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
+		return tokens[0];
 	}
 
 }

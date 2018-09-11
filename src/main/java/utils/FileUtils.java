@@ -7,10 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class FileUtils {
-	
-	public static void deletelocalFile(String dirName, String fileName) {
 
-		File f = new File(dirName + "/" + fileName);
+	public static void deletelocalFile(String dirName, String fileName) {
+		String localFileName = FileUtils.getLocalFileName(fileName, dirName);
+		File f = new File(localFileName);
 		if (!f.exists()) {
 			System.out.println("File " + fileName + " does not exist");
 			return;
@@ -35,11 +35,12 @@ public class FileUtils {
 		}
 		return DirName;
 	}
-	
-	public static void writeFile(String fileName, byte[] byteArr) {
+
+	public static void writeFile(String fileName, String dirName, byte[] byteArr) {
 		FileOutputStream encFile;
+		String outputFilePath = FileUtils.getLocalFileName(fileName, dirName);
 		try {
-			encFile = new FileOutputStream(fileName);
+			encFile = new FileOutputStream(outputFilePath);
 			encFile.write(byteArr);
 			encFile.close();
 			System.out.println("finished writing to file " + fileName);
@@ -51,16 +52,21 @@ public class FileUtils {
 			e.printStackTrace();
 		}
 	}
-	
-	public static byte[] readFile(String fileName) {
-		File plainText = new File(fileName);
+
+	public static byte[] readFile(String fileName, String dirName) {
+		String localFileName = FileUtils.getLocalFileName(fileName, dirName);
+		File plainText = new File(localFileName);
+		if (!plainText.exists()) {
+			System.out.print(fileName + "File does not exit");
+			return null;
+		}
 		byte[] plainTextArr = null;
 		FileInputStream fisPlainText;
 		try {
 			fisPlainText = new FileInputStream(plainText);
 
-		plainTextArr = new byte[(int) plainText.length()];
-		fisPlainText.read(plainTextArr);
+			plainTextArr = new byte[(int) plainText.length()];
+			fisPlainText.read(plainTextArr);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,10 +76,15 @@ public class FileUtils {
 		}
 		return plainTextArr;
 	}
-	
-	public static void duplicateFile(String fileName, String cpFileName) {
-		byte[] byteArr = readFile(fileName);
-		writeFile(cpFileName, byteArr);
+
+	public static void duplicateFile(String fileName, String dirName, String cpFileName) {
+		byte[] byteArr = readFile(fileName, dirName);
+		writeFile(cpFileName, dirName, byteArr);
 		System.out.println("Finish duplication of file: " + fileName);
+	}
+
+	public static String getLocalFileName(String fileName, String dirName) {
+		String localFile = dirName + "/" + fileName;
+		return localFile;
 	}
 }
