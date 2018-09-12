@@ -39,7 +39,7 @@ public class Main {
 	public static final int button_WIDTH = 75;
 	public static final int button_HEIGHT = 35;
 	public static final int button_LG_HEIGHT = 50;
-	
+
 	public static final int TEXTAREA_WIDTH = 600;
 	public static final int TEXTAREA_HEIGHT = 150;
 
@@ -80,18 +80,16 @@ public class Main {
 	private String DirName;
 	private long blockLen = 256;
 
-
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
-		
+
 		output = new JTextArea("Empty");
 		output.setEditable(false);
 		output.setBounds(firstX_loc, lastLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
-		
-		
+
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
 		m_helper = new Helper();
@@ -179,8 +177,9 @@ public class Main {
 				startNodeAndFolder(localPortNum);
 				m_contact = m_node.getAddress();
 				isJoinRing();
-				
-				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip +", Local Port Num: " + localPortNum + "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+
+				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
+						+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 			}
 		});
 
@@ -206,7 +205,8 @@ public class Main {
 					return;
 				}
 				isJoinRing();
-				output.setText("Joining the Chord ring\nLocal IP: " + local_ip +", Local Port Num: " + localPortNum + "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+				output.setText("Joining the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
+						+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 
 			}
 		});
@@ -249,15 +249,15 @@ public class Main {
 				// get file info, encryption and split file
 				String inputFileName = uploadField.getText();
 				checkInputFile(inputFileName);
-				
-//				String splitFile = inputFileName;
-				
+
+				// String splitFile = inputFileName;
+
 				// encrypt and then split
 				String encFileName = Encryption.EncodePrefix + inputFileName;
 				Encryption.encrypt(inputFileName, DirName, encFileName);
 				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
 
-				// send out the each of file		
+				// send out the each of file
 				for (String splitFile : splitList) {
 					System.out.println("\nCurrent Split File: " + splitFile);
 					InetSocketAddress result = getFileSuccessor(splitFile);
@@ -278,13 +278,18 @@ public class Main {
 							} else {
 								Props.writeProp(splitFile, sentSockStr, propFileName);
 							}
-							output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully upload file: " + splitFile);
+							output.setText(
+									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+											+ "\nsuccesfully upload file: " + splitFile);
 						} else {
 							String localSock = local_ip + " " + localPortNum;
 							String tmp_response = Helper.sendFile(result, DirName, splitFile, localSock, false);
 							System.out.println("sending: " + splitFile + " success");
 							System.out.println("feedback: " + tmp_response);
-							output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully send file to successor cloud account, and upload file: " + splitFile);
+							output.setText(
+									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+											+ "\nsuccesfully send file to successor cloud account, and upload file: "
+											+ splitFile);
 						}
 
 						// keep track of all the uploaded files from current
@@ -298,7 +303,7 @@ public class Main {
 						}
 					}
 				}
-	
+
 			}
 		});
 
@@ -308,27 +313,46 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				String inputFileName = downloadField.getText();
-				checkInputFile(inputFileName);
-				InetSocketAddress result = getFileSuccessor(inputFileName);
+				String encFileName = Encryption.EncodePrefix + inputFileName;
+				String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
+				List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
+				
+				// for (String string : fileList) {
+				// System.out.println("file: " + string);
+				// }
+				
+				for (String splitFile : splitList) {
+					checkInputFile(splitFile);
+					InetSocketAddress result = getFileSuccessor(splitFile);
 
-				String propFileName = DirName + Helper.SENT_FILE_LIST;
-				String queryRes = Props.readProp(inputFileName, propFileName);
-				if (queryRes == null) {
-					illegalDownload.setText("the target file does not belong with the current user");
-				} else {
-					if (result.equals(localAddress)) {
-						Gcloud gc = new Gcloud(DirName);
-						gc.downLoadFile(inputFileName);
-						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) +"\nsuccesfully download file: " + inputFileName);
-
+					String propFileName = DirName + Helper.SENT_FILE_LIST;
+					String queryRes = Props.readProp(splitFile, propFileName);
+					if (queryRes == null) {
+						illegalDownload.setText("the target file does not belong with the current user");
 					} else {
-						String res = Helper.sendQueryFile(result, DirName, inputFileName);
-						System.out.println("feedback: " + res);
-						output.setText("file " + inputFileName + ", Position is " + Helper.hexFileNameAndPosition(inputFileName) +"\nsuccesfully download file: " + inputFileName + " from target cloud account");
+						if (result.equals(localAddress)) {
+							Gcloud gc = new Gcloud(DirName);
+							gc.downLoadFile(splitFile);
+							output.setText("file " + splitFile + ", Position is "
+									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
+									+ splitFile);
 
+						} else {
+							String res = Helper.sendQueryFile(result, DirName, splitFile);
+							System.out.println("feedback: " + res);
+							output.setText("file " + splitFile + ", Position is "
+									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
+									+ splitFile + " from target cloud account");
+						}
 					}
+					System.out.println();
 				}
-
+				
+				
+				// join and decrpt
+				String downloadFolder = DirName + Helper.DOWNLOADS;
+				SplitFile.join(encFileName, downloadFolder);
+				Encryption.decrpt(encFileName, DirName, inputFileName);
 			}
 		});
 
@@ -392,7 +416,7 @@ public class Main {
 
 	private boolean checkInputFile(String fileName) {
 		long hash = Helper.hashString(fileName);
-		System.out.println("Hash value is " + Long.toHexString(hash));
+//		System.out.println("Hash value is " + Long.toHexString(hash));
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 
 		// if fail to send request, local node is disconnected, exit

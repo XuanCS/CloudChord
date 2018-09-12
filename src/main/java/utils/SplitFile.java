@@ -19,7 +19,7 @@ public class SplitFile {
 			File filename = new File(localFileName);
 			OutputStream outfile = new BufferedOutputStream(new FileOutputStream(filename));
 			while (true) {
-				filename = new File(fileName + count + ".sp");
+				filename = new File(localFileName + count + ".sp");
 				if (filename.exists()) {
 					InputStream infile = new BufferedInputStream(new FileInputStream(filename));
 					data = infile.read();

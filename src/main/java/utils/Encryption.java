@@ -53,8 +53,8 @@ public class Encryption {
 
 	public static void decrpt(String encFileName, String dirName, String oriFileName) {
 		try {
-			String localFileName = FileUtils.getLocalFileName(encFileName, dirName);
-			byte[] encodedFileByte = FileUtils.readFile(localFileName, dirName);	
+			String downloadFolder = dirName + Helper.DOWNLOADS;
+			byte[] encodedFileByte = FileUtils.readFile(encFileName, downloadFolder);	
 			String literalFileName = getBaseFileName(encFileName);
 			byte[] fileAESKbyte = FileUtils.readFile(literalFileName + KeyFileName, dirName);
 
@@ -64,7 +64,7 @@ public class Encryption {
 			deCipherAES2.init(Cipher.DECRYPT_MODE, key128AES2);
 			byte[] fileTarget = deCipherAES2.doFinal(encodedFileByte);
 			
-			FileUtils.writeFile(oriFileName, dirName, fileTarget);
+			FileUtils.writeFile(oriFileName, downloadFolder, fileTarget);
 			System.out.println("finish decrypt " + oriFileName);
 
 			
