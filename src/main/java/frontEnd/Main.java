@@ -227,19 +227,22 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				// iterate all files in cloud
+				
 				InetSocketAddress successor = m_node.getSuccessor();
-
+				boolean isLastNode = checkLastNode();
+				
+				System.out.println("Current Node is Last One: " + isLastNode);
+				System.out.println("local: " + localAddress);
 				// iterate all files in cloud
 				String localSock = local_ip + " " + localPortNum;
 
-				Helper.downSendAllCloudFiles(DirName, localSock, successor);
+				Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
 
 				m_node.stopAllThreads();
 				output.setText("send out all files from user's cloud account, Leaving the ring...");
 				System.out.println("Leaving the ring...");
 				System.exit(0);
+				
 			}
 		});
 
@@ -360,9 +363,6 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// starter.setEditable(true);
-				// follower.setEditable(true);
-
 				uploadField.setText("");
 				downloadField.setText("");
 				illegalUpload.setText("");
@@ -432,6 +432,18 @@ public class Main {
 		System.out.println("Hash value is " + Long.toHexString(hash));
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 		return result;
+	}
+	
+	private boolean checkLastNode() {
+		// check whether this is the last node
+		InetSocketAddress successor = m_node.getSuccessor();
+		InetSocketAddress predecessor = m_node.getPredecessor();
+		boolean isRes = false;
+		if ((predecessor == null || predecessor.equals(localAddress)) && (successor == null || successor.equals(localAddress))) {		
+			isRes = true;
+			System.out.println("This is the last Node");
+		}
+		return isRes;
 	}
 
 	public static void main(String[] args) {

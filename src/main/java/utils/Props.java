@@ -152,4 +152,27 @@ public class Props {
 		}
 		return arrList;
 	}
+	
+	public static void rmPropKey(String key, String propFileName) {
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
+			FileOutputStream out = new FileOutputStream(propFileName);
+			
+			Properties props = new Properties();
+			props.load(in);
+			in.close();
+			props.remove(key);
+			props.store(out, null);
+			out.close();
+
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

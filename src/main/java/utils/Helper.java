@@ -390,7 +390,7 @@ public class Helper {
 				myByteArray = FileUtils.readFile(fileName, dirName);
 			}
 			int fileSize = myByteArray.length;
-			
+
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
 			System.out.println("Sending " + fileName);
 
@@ -526,7 +526,8 @@ public class Helper {
 		return res;
 	}
 
-	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor) {
+	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor,
+			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		FileInputStream in;
 		try {
@@ -537,12 +538,18 @@ public class Helper {
 			in.close();
 
 			for (String key : props.stringPropertyNames()) {
+				String res = props.getProperty(key);
 				Gcloud gc = new Gcloud(dirName);
-				gc.downLoadFile(key);
-
-				String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
-				System.out.println("sending: " + key + " success");
-				System.out.println("feedback: " + tmp_response);
+				if (isLastNode) {
+					gc.directDelFile(res);
+				} else {
+					gc.downLoadFile(key);
+					gc.directDelFile(res);
+					String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
+					System.out.println("sending: " + key + " success");
+					System.out.println("feedback: " + tmp_response);
+				}
+				System.out.println();
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

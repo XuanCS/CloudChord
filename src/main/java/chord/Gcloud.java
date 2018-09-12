@@ -184,7 +184,7 @@ public class Gcloud {
 			OutputStream out = new FileOutputStream(FileUtils.getLocalFileName(file.getName(), downloadDirName));
 			Drive.Files.Get request = service.files().get(res);
 			request.executeMediaAndDownloadTo(out);
-			System.out.println("successfully download file to " + dirName + Helper.DOWNLOADS);
+			System.out.println("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
 			// deleteFile(targetFN);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -202,12 +202,24 @@ public class Gcloud {
 			}
 
 			service.files().delete(res).execute();
-
+			Props.rmPropKey(targetFN, propFileName);
 			System.out.println("succesfully delte target file");
 		} catch (IOException e) {
 			System.out.println("An error occurred: " + e);
 		}
 	}
+	
+	public void directDelFile(String key) {
+		try {
+			String propFileName = dirName + Helper.CLOUD_LIST;
+			service.files().delete(key).execute();
+			Props.rmPropKey(key, propFileName);
+			System.out.println("succesfully delte target file");
+		} catch (IOException e) {
+			System.out.println("An error occurred: " + e);
+		}
+	}
+	
 
 	private void listFiles() {
 		FileList result;
