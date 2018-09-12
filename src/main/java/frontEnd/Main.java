@@ -78,7 +78,7 @@ public class Main {
 	private String local_ip = null;
 	private String localPortNum;
 	private String DirName;
-	private long blockLen = 1024 * 2;
+	private long blockLen = 256;
 
 
 	public Main() {
@@ -250,13 +250,16 @@ public class Main {
 				String inputFileName = uploadField.getText();
 				checkInputFile(inputFileName);
 				
-				String splitFile = inputFileName;
-//				String encFileName = Encryption.EncodePrefix + inputFileName;
-//				Encryption.encrypt(inputFileName, DirName, encFileName);
-//				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
+//				String splitFile = inputFileName;
+				
+				// encrypt and then split
+				String encFileName = Encryption.EncodePrefix + inputFileName;
+				Encryption.encrypt(inputFileName, DirName, encFileName);
+				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
 
-				// send out the each of file
-//				for (String splitFile : splitList) {								
+				// send out the each of file		
+				for (String splitFile : splitList) {
+					System.out.println("\nCurrent Split File: " + splitFile);
 					InetSocketAddress result = getFileSuccessor(splitFile);
 					String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
 					File targetFile = new File(targetFilePath);
@@ -294,8 +297,8 @@ public class Main {
 							Props.writeProp(splitFile, sentSockStr, propFileName);
 						}
 					}
-//				}
-		
+				}
+	
 			}
 		});
 
@@ -389,7 +392,7 @@ public class Main {
 
 	private boolean checkInputFile(String fileName) {
 		long hash = Helper.hashString(fileName);
-		System.out.println("\nHash value is " + Long.toHexString(hash));
+		System.out.println("Hash value is " + Long.toHexString(hash));
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 
 		// if fail to send request, local node is disconnected, exit
@@ -402,7 +405,7 @@ public class Main {
 
 	private InetSocketAddress getFileSuccessor(String fileName) {
 		long hash = Helper.hashString(fileName);
-		System.out.println("\nHash value is " + Long.toHexString(hash));
+		System.out.println("Hash value is " + Long.toHexString(hash));
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 		return result;
 	}

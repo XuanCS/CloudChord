@@ -14,6 +14,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 
+import utils.FileUtils;
 import utils.Helper;
 import utils.Props;
 
@@ -68,7 +69,6 @@ public class Gcloud {
 
 	public Gcloud(String folderName) {
 		dirName = folderName;
-
 		DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"),
 				".credentials_" + folderName + "/drive-java-quickstart");
 		try {
@@ -81,9 +81,7 @@ public class Gcloud {
 			System.exit(1);
 		}
 		service = getDriveService();
-
-		System.out.println("successfully connect to Google Drive");
-
+		System.out.println("successfully connect to Google Drive Account: " + folderName);
 	}
 
 	/**
@@ -95,10 +93,7 @@ public class Gcloud {
 	public Credential authorize() {
 
 		String filename = Helper.CLIENT_SECRET;
-
-		java.io.File file = new java.io.File(dirName + "/" + filename);
-		System.out.println("current dir: " + dirName);
-
+		java.io.File file = new java.io.File(FileUtils.getLocalFileName(filename, dirName));	
 		InputStream in;
 		Credential credential = null;
 		try {
@@ -135,7 +130,7 @@ public class Gcloud {
 
 	public String uploadTextFile(String title) {
 
-		String filePath = dirName + "/" + title;
+		String filePath = FileUtils.getLocalFileName(title, dirName);
 		File body = new File();
 		body.setName(title);
 		body.setDescription("A test document");
@@ -150,12 +145,11 @@ public class Gcloud {
 		String res = null;
 		try {
 			file = service.files().create(body, mediaContent).execute();
-
 			res = file.getId();
 			System.out.println("fileID: " + res);
 
 			if (res != null) {
-				System.out.println("successfully upload");
+				System.out.println("successfully upload: " + title);
 			}
 
 			String propFileName = dirName + Helper.CLOUD_LIST;
@@ -184,14 +178,10 @@ public class Gcloud {
 		File file;
 		try {
 			file = service.files().get(res).execute();
-
-			// create local directory based on folder
-			// String downLoadDirName = "Chord_" + localPortNum;
-
 			// downloads to target downloads folder
 			String downloadDirName = dirName + Helper.DOWNLOADS;
 
-			OutputStream out = new FileOutputStream(downloadDirName + "/" + file.getName());
+			OutputStream out = new FileOutputStream(FileUtils.getLocalFileName(file.getName(), downloadDirName));
 			Drive.Files.Get request = service.files().get(res);
 			request.executeMediaAndDownloadTo(out);
 			System.out.println("successfully download file to " + dirName + Helper.DOWNLOADS);
@@ -200,13 +190,10 @@ public class Gcloud {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	public void deleteFile(String targetFN) {
 		try {
-			// String name = service.files().get(fileId).
-
 			String propFileName = dirName + Helper.CLOUD_LIST;
 			String res = Props.readProp(targetFN, propFileName);
 			if (res == null) {
@@ -226,7 +213,6 @@ public class Gcloud {
 		FileList result;
 		try {
 			result = service.files().list().execute();
-
 			List<File> files = result.getFiles();
 
 			// list files

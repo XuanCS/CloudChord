@@ -32,7 +32,7 @@ public class Props {
 			}
 
 		}
-		System.out.println("successfully written to local cloud.props");
+		System.out.println("successfully written to " + propFileName);
 
 	}
 
@@ -85,7 +85,7 @@ public class Props {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("successfully update to local config.property");
+		System.out.println("successfully update to " + propFileName);
 	}
 
 	public static String seekProp(String target, String propFileName) {

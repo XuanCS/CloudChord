@@ -42,7 +42,8 @@ public class SplitFile {
 	}
 
 	public static List<String> split(String fileName, String dirName, long splitlen) {
-		long leninfile = 0, leng = 0;
+		long leninfile = 0; 
+		long leng = 0;
 		int count = 1, data;
 		List<String> splitList = new ArrayList<String>();
 		try {
@@ -51,9 +52,11 @@ public class SplitFile {
 			InputStream infile = new BufferedInputStream(new FileInputStream(filename));
 			data = infile.read();
 			while (data != -1) {
-				String splitFileName = fileName + count + ".sp";
+				String localSplitFileName = fileName + count + ".sp";
+				splitList.add(localSplitFileName);
+				
+				String splitFileName = FileUtils.getLocalFileName(localSplitFileName, dirName);
 				filename = new File(splitFileName);
-				splitList.add(splitFileName);
 				OutputStream outfile = new BufferedOutputStream(new FileOutputStream(filename));
 				while (data != -1 && leng < splitlen) {
 					outfile.write(data);
@@ -64,7 +67,8 @@ public class SplitFile {
 				leng = 0;
 				outfile.close();
 				count++;
-			}		
+			}
+			infile.close();
 			System.out.println("finish spliting " + fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
