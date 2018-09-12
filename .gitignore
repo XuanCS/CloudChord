@@ -4,6 +4,7 @@ gradle/
 build/
 *.txt
 *.props
+*.sp
 
 # Eclipse
 *.json
