@@ -565,19 +565,19 @@ public class Helper {
 		FileMsg file = (FileMsg) msg;
 		String fileName = file.getFileName();
 		byte[] contents = file.getContents();
-		String fileSockInfo = file.getFileSockInfo();
+//		String fileSockInfo = file.getFileSockInfo();
 
 		FileUtils.writeFile(fileName, dirName, contents);
 		System.out.println("Object received: " + msg);
 
 		// save into RECV_LIST
-		String propFileName = dirName + Helper.RECV_FILE_LIST;
-		File propFile = new File(propFileName);
-		if (propFile.exists()) {
-			Props.updateProp(fileName, fileSockInfo, propFileName);
-		} else {
-			Props.writeProp(fileName, fileSockInfo, propFileName);
-		}
+//		String propFileName = dirName + Helper.RECV_FILE_LIST;
+//		File propFile = new File(propFileName);
+//		if (propFile.exists()) {
+//			Props.updateProp(fileName, fileSockInfo, propFileName);
+//		} else {
+//			Props.writeProp(fileName, fileSockInfo, propFileName);
+//		}
 		return fileName;
 	}
 
@@ -601,13 +601,13 @@ public class Helper {
 		msg.setFileName(fileName);
 		msg.setFileSize(fileSize);
 		msg.setContents(myByteArray);
-		if (fromDownFolder) {
-			String propFileName = dirName + Helper.RECV_FILE_LIST;
-			String homeSockInfo = Props.seekProp(fileName, propFileName);
-			msg.setFileSockInfo(homeSockInfo);
-		} else {
-			msg.setFileSockInfo(localSock);
-		}
+//		if (fromDownFolder) {
+//			String propFileName = dirName + Helper.RECV_FILE_LIST;
+//			String homeSockInfo = Props.seekProp(fileName, propFileName);
+//			msg.setFileSockInfo(homeSockInfo);
+//		} else {
+//			msg.setFileSockInfo(localSock);
+//		}
 		return msg;
 	}
 

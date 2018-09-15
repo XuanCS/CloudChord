@@ -9,7 +9,7 @@ public class FileMsg extends Msg {
 	private String fileName;
 //	private String dirName;
 	private byte[] contents;
-	private String fileSockInfo;
+//	private String fileSockDir;
 	
 	
 	public FileMsg(int type, String cmd) {
@@ -40,21 +40,13 @@ public class FileMsg extends Msg {
 		fileName = str;
 	}
 	
-//	public String getDirName() {
-//		return dirName;
+//	public void setFileSockInfo(String dir) {
+//		fileSockDir = dir;
 //	}
-//
-//	public void setDirName(String dirName) {
-//		this.dirName = dirName;
+//	
+//	public String getFileSockInfo() {
+//		return fileSockDir;
 //	}
-	
-	public void setFileSockInfo(String info) {
-		fileSockInfo = info;
-	}
-	
-	public String getFileSockInfo() {
-		return fileSockInfo;
-	}
 	
 
 
