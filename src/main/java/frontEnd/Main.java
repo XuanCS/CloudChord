@@ -227,10 +227,10 @@ public class Main {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				InetSocketAddress successor = m_node.getSuccessor();
 				boolean isLastNode = checkLastNode();
-				
+
 				System.out.println("Current Node is Last One: " + isLastNode);
 				System.out.println("local: " + localAddress);
 				// iterate all files in cloud
@@ -242,7 +242,7 @@ public class Main {
 				output.setText("send out all files from user's cloud account, Leaving the ring...");
 				System.out.println("Leaving the ring...");
 				System.exit(0);
-				
+
 			}
 		});
 
@@ -255,10 +255,11 @@ public class Main {
 
 				// String splitFile = inputFileName;
 
-				// encrypt and then split
+				// encrypt and then split and delete the encode file
 				String encFileName = Encryption.EncodePrefix + inputFileName;
 				Encryption.encrypt(inputFileName, DirName, encFileName);
 				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
+				FileUtils.deletelocalFile(DirName, encFileName);
 
 				// send out the each of file
 				for (String splitFile : splitList) {
@@ -305,6 +306,8 @@ public class Main {
 							Props.writeProp(splitFile, sentSockStr, propFileName);
 						}
 					}
+					// delete all the split files
+					FileUtils.deletelocalFile(DirName, splitFile);
 				}
 
 			}
@@ -319,11 +322,7 @@ public class Main {
 				String encFileName = Encryption.EncodePrefix + inputFileName;
 				String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
 				List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
-				
-				// for (String string : fileList) {
-				// System.out.println("file: " + string);
-				// }
-				
+
 				for (String splitFile : splitList) {
 					checkInputFile(splitFile);
 					InetSocketAddress result = getFileSuccessor(splitFile);
@@ -336,9 +335,9 @@ public class Main {
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
 							gc.downLoadFile(splitFile);
-							output.setText("file " + splitFile + ", Position is "
-									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
-									+ splitFile);
+							output.setText(
+									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+											+ "\nsuccesfully download file: " + splitFile);
 
 						} else {
 							String res = Helper.sendQueryFile(result, DirName, splitFile);
@@ -350,12 +349,17 @@ public class Main {
 					}
 					System.out.println();
 				}
-				
-				
+
 				// join and decrpt
 				String downloadFolder = DirName + Helper.DOWNLOADS;
 				SplitFile.join(encFileName, downloadFolder);
 				Encryption.decrpt(encFileName, DirName, inputFileName);
+				
+				// delete encoded file and split files
+				for (String splitFile : splitList) {
+					FileUtils.deletelocalFile(downloadFolder, splitFile);
+				}
+				FileUtils.deletelocalFile(downloadFolder, encFileName);
 			}
 		});
 
@@ -416,7 +420,7 @@ public class Main {
 
 	private boolean checkInputFile(String fileName) {
 		long hash = Helper.hashString(fileName);
-//		System.out.println("Hash value is " + Long.toHexString(hash));
+		// System.out.println("Hash value is " + Long.toHexString(hash));
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 
 		// if fail to send request, local node is disconnected, exit
@@ -433,13 +437,14 @@ public class Main {
 		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
 		return result;
 	}
-	
+
 	private boolean checkLastNode() {
 		// check whether this is the last node
 		InetSocketAddress successor = m_node.getSuccessor();
 		InetSocketAddress predecessor = m_node.getPredecessor();
 		boolean isRes = false;
-		if ((predecessor == null || predecessor.equals(localAddress)) && (successor == null || successor.equals(localAddress))) {		
+		if ((predecessor == null || predecessor.equals(localAddress))
+				&& (successor == null || successor.equals(localAddress))) {
 			isRes = true;
 			System.out.println("This is the last Node");
 		}
