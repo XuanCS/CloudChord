@@ -263,25 +263,28 @@ public class Main {
 
 				// send out the each of file
 				for (String splitFile : splitList) {
-					System.out.println("\nCurrent Split File: " + splitFile);
-					InetSocketAddress result = getFileSuccessor(splitFile);
+					System.out.println("\nCurrent Split File: " + splitFile);			
+					
+					// send out the split file
 					String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
 					File targetFile = new File(targetFilePath);
+					String hashFileName = getFileHash(splitFile);
+
+				
 					if (!targetFile.exists()) {
 						illegalUpload.setText("the target file is not in the user's directory");
 					} else {
+						
+						// rename the split file and update cloud.props
+						FileUtils.renameFile(splitFile, hashFileName, DirName);
+						FileUtils.updateNamePropFile(splitFile, DirName, hashFileName);			
+						
+						// send out files
+						InetSocketAddress result = getFileSuccessor(hashFileName);				
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
-							gc.uploadTextFile(splitFile);
+							gc.uploadTextFile(hashFileName);
 
-//							String propFileName = DirName + Helper.RECV_FILE_LIST;
-//							File propFile = new File(propFileName);
-//							String sentSockStr = result.getHostString() + " " + result.getPort();
-//							if (propFile.exists()) {
-//								Props.updateProp(splitFile, sentSockStr, propFileName);
-//							} else {
-//								Props.writeProp(splitFile, sentSockStr, propFileName);
-//							}
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully upload file: " + splitFile);
@@ -297,19 +300,13 @@ public class Main {
 						}
 
 						// keep track of all the uploaded files from current
-						String propFileName = DirName + Helper.SENT_FILE_LIST;
-						File propFile = new File(propFileName);
 						String sentSockStr = result.getHostString() + " " + result.getPort();
-						if (propFile.exists()) {
-							Props.updateProp(splitFile, sentSockStr, propFileName);
-						} else {
-							Props.writeProp(splitFile, sentSockStr, propFileName);
-						}
+						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);			
 					}
+									
 					// delete all the split files
-					FileUtils.deletelocalFile(DirName, splitFile);
+					FileUtils.deletelocalFile(DirName, hashFileName);
 				}
-
 			}
 		});
 
@@ -400,11 +397,13 @@ public class Main {
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
 		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
+		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
 
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
 		FileUtils.createFile(cloudPropName);
 		FileUtils.createFile(namePropName);
+		FileUtils.createFile(sentPropName);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
@@ -434,6 +433,12 @@ public class Main {
 			System.exit(0);
 		}
 		return true;
+	}
+	
+	private String getFileHash(String fileName) {
+		long hash = Helper.hashString(fileName);
+		String res =  Long.toHexString(hash);
+		return res;
 	}
 
 	private InetSocketAddress getFileSuccessor(String fileName) {

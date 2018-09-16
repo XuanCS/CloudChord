@@ -93,7 +93,7 @@ public class Gcloud {
 	public Credential authorize() {
 
 		String filename = Helper.CLIENT_SECRET;
-		java.io.File file = new java.io.File(FileUtils.getLocalFileName(filename, dirName));	
+		java.io.File file = new java.io.File(FileUtils.getLocalFileName(filename, dirName));
 		InputStream in;
 		Credential credential = null;
 		try {
@@ -153,12 +153,7 @@ public class Gcloud {
 			}
 
 			String propFileName = dirName + Helper.CLOUD_LIST;
-			java.io.File propFile = new java.io.File(propFileName);
-			if (propFile.exists()) {
-				Props.updateProp(title, res, propFileName);
-			} else {
-				Props.writeProp(title, res, propFileName);
-			}
+			Props.updateProp(title, res, propFileName);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -208,7 +203,7 @@ public class Gcloud {
 			System.out.println("An error occurred: " + e);
 		}
 	}
-	
+
 	public void directDelFile(String key) {
 		try {
 			String propFileName = dirName + Helper.CLOUD_LIST;
@@ -219,7 +214,6 @@ public class Gcloud {
 			System.out.println("An error occurred: " + e);
 		}
 	}
-	
 
 	private void listFiles() {
 		FileList result;

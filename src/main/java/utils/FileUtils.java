@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
 public class FileUtils {
 
@@ -88,9 +87,12 @@ public class FileUtils {
 		String localFile = dirName + "/" + fileName;
 		return localFile;
 	}
-	
-	public static void createFile(String fileName) {
+
+	public static File createFile(String fileName) {
 		File f = new File(fileName);
+		if (f.exists()) {
+			return f;
+		}
 		try {
 			FileOutputStream out = new FileOutputStream(f);
 			out.close();
@@ -101,16 +103,38 @@ public class FileUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return f;
 	}
-	
-	public void updatePropFile(String fileName, String DirName, InetSocketAddress result) {
+
+	public static void updateSentPropFile(String fileName, String DirName, String sentSockStr) {
 		String propFileName = DirName + Helper.SENT_FILE_LIST;
-//		File propFile = new File(propFileName);
-		String sentSockStr = result.getHostString() + " " + result.getPort();
-//		if (propFile.exists()) {
-			Props.updateProp(fileName, sentSockStr, propFileName);
-//		} else {
-//			Props.writeProp(fileName, sentSockStr, propFileName);
-//		}
+		Props.updateProp(fileName, sentSockStr, propFileName);
+	}
+
+	public static void updateNamePropFile(String oldName, String DirName, String hashName) {
+		String propFileName = DirName + Helper.NAME_LIST;
+		Props.updateProp(oldName, hashName, propFileName);
+	}
+
+	public static void renameFile(String oldName, String newName, String dirName) {
+		String oldFilePath = getLocalFileName(oldName, dirName);
+		String newFilePath = getLocalFileName(newName, dirName);
+		File file = new File(oldFilePath);
+		File file2 = new File(newFilePath);
+
+		if (file2.exists())
+			try {
+				throw new java.io.IOException("file exists");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		// Rename file (or directory)
+		boolean success = file.renameTo(file2);
+		if (!success) {
+			System.out.println("rename failed");
+		} else {
+			System.out.println("rename success");
+		}
 	}
 }
