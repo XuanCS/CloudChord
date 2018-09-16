@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class FileUtils {
 
@@ -23,7 +24,7 @@ public class FileUtils {
 	}
 
 	public static String createFolder(String localChordNum) {
-		String DirName = "Chord_" + localChordNum;
+		String DirName = Helper.chordPrefix + localChordNum;
 
 		File dirFileName = new File(DirName);
 		if (!dirFileName.exists()) {
@@ -86,5 +87,30 @@ public class FileUtils {
 	public static String getLocalFileName(String fileName, String dirName) {
 		String localFile = dirName + "/" + fileName;
 		return localFile;
+	}
+	
+	public static void createFile(String fileName) {
+		File f = new File(fileName);
+		try {
+			FileOutputStream out = new FileOutputStream(f);
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void updatePropFile(String fileName, String DirName, InetSocketAddress result) {
+		String propFileName = DirName + Helper.SENT_FILE_LIST;
+//		File propFile = new File(propFileName);
+		String sentSockStr = result.getHostString() + " " + result.getPort();
+//		if (propFile.exists()) {
+			Props.updateProp(fileName, sentSockStr, propFileName);
+//		} else {
+//			Props.writeProp(fileName, sentSockStr, propFileName);
+//		}
 	}
 }

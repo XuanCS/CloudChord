@@ -274,14 +274,14 @@ public class Main {
 							Gcloud gc = new Gcloud(DirName);
 							gc.uploadTextFile(splitFile);
 
-							String propFileName = DirName + Helper.RECV_FILE_LIST;
-							File propFile = new File(propFileName);
-							String sentSockStr = result.getHostString() + " " + result.getPort();
-							if (propFile.exists()) {
-								Props.updateProp(splitFile, sentSockStr, propFileName);
-							} else {
-								Props.writeProp(splitFile, sentSockStr, propFileName);
-							}
+//							String propFileName = DirName + Helper.RECV_FILE_LIST;
+//							File propFile = new File(propFileName);
+//							String sentSockStr = result.getHostString() + " " + result.getPort();
+//							if (propFile.exists()) {
+//								Props.updateProp(splitFile, sentSockStr, propFileName);
+//							} else {
+//								Props.writeProp(splitFile, sentSockStr, propFileName);
+//							}
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully upload file: " + splitFile);
@@ -398,8 +398,13 @@ public class Main {
 	}
 
 	private void startNodeAndFolder(String localPortNum) {
+		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
+		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
+
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
+		FileUtils.createFile(cloudPropName);
+		FileUtils.createFile(namePropName);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
