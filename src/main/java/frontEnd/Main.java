@@ -263,24 +263,22 @@ public class Main {
 
 				// send out the each of file
 				for (String splitFile : splitList) {
-					System.out.println("\nCurrent Split File: " + splitFile);			
-					
+					System.out.println("\nCurrent Split File: " + splitFile);
+
 					// send out the split file
 					String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
 					File targetFile = new File(targetFilePath);
 					String hashFileName = getFileHash(splitFile);
 
-				
 					if (!targetFile.exists()) {
 						illegalUpload.setText("the target file is not in the user's directory");
 					} else {
-						
 						// rename the split file and update cloud.props
 						FileUtils.renameFile(splitFile, hashFileName, DirName);
-						FileUtils.updateNamePropFile(splitFile, DirName, hashFileName);			
-						
+//						FileUtils.updateNamePropFile(splitFile, DirName, hashFileName);
+
 						// send out files
-						InetSocketAddress result = getFileSuccessor(hashFileName);				
+						InetSocketAddress result = getFileSuccessor(hashFileName);
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
 							gc.uploadTextFile(hashFileName);
@@ -301,9 +299,9 @@ public class Main {
 
 						// keep track of all the uploaded files from current
 						String sentSockStr = result.getHostString() + " " + result.getPort();
-						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);			
+						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);
 					}
-									
+
 					// delete all the split files
 					FileUtils.deletelocalFile(DirName, hashFileName);
 				}
@@ -311,38 +309,37 @@ public class Main {
 		});
 
 		downloadBtn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				String inputFileName = downloadField.getText();
 				String encFileName = Encryption.EncodePrefix + inputFileName;
 				String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
 				List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
 
 				for (String splitFile : splitList) {
-					checkInputFile(splitFile);
-					InetSocketAddress result = getFileSuccessor(splitFile);
+					String targetSock = FileUtils.isFromSentProp(splitFile, DirName);
+					InetSocketAddress result = Helper
+							.createSocketAddress(targetSock.split(" ")[0] + ":" + targetSock.split(" ")[1]);
 
-					String propFileName = DirName + Helper.SENT_FILE_LIST;
-					String queryRes = Props.readProp(splitFile, propFileName);
-					if (queryRes == null) {
+					if (targetSock.length() == 0) {
 						illegalDownload.setText("the target file does not belong with the current user");
 					} else {
-						if (result.equals(localAddress)) {
+						String hashFileName = getFileHash(splitFile);						
+						if (localAddress.equals(result)) {
 							Gcloud gc = new Gcloud(DirName);
-							gc.downLoadFile(splitFile);
+							gc.downLoadFile(hashFileName);
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully download file: " + splitFile);
 
 						} else {
-							String res = Helper.sendQueryFile(result, DirName, splitFile);
+							String res = Helper.sendQueryFile(result, DirName, hashFileName);
 							System.out.println("feedback: " + res);
 							output.setText("file " + splitFile + ", Position is "
 									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
 									+ splitFile + " from target cloud account");
 						}
+						FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);						
 					}
 					System.out.println();
 				}
@@ -351,12 +348,13 @@ public class Main {
 				String downloadFolder = DirName + Helper.DOWNLOADS;
 				SplitFile.join(encFileName, downloadFolder);
 				Encryption.decrpt(encFileName, DirName, inputFileName);
-				
+
 				// delete encoded file and split files
 				for (String splitFile : splitList) {
 					FileUtils.deletelocalFile(downloadFolder, splitFile);
 				}
 				FileUtils.deletelocalFile(downloadFolder, encFileName);
+
 			}
 		});
 
@@ -396,13 +394,13 @@ public class Main {
 
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
-		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
+//		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
 
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
 		FileUtils.createFile(cloudPropName);
-		FileUtils.createFile(namePropName);
+//		FileUtils.createFile(namePropName);
 		FileUtils.createFile(sentPropName);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
@@ -434,10 +432,10 @@ public class Main {
 		}
 		return true;
 	}
-	
+
 	private String getFileHash(String fileName) {
 		long hash = Helper.hashString(fileName);
-		String res =  Long.toHexString(hash);
+		String res = Long.toHexString(hash);
 		return res;
 	}
 

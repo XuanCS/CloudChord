@@ -52,7 +52,7 @@ public class Helper {
 	public static final String SENT_FILE_LIST = "/sent_file.props";
 //	public static final String RECV_FILE_LIST = "/recv_file.props";
 	public static final String CLOUD_LIST = "/cloud.props";
-	public static final String NAME_LIST = "/name.props";
+//	public static final String NAME_LIST = "/name.props";
 	public static final String CLIENT_SECRET = "client_secret.json";
 
 	public static final int CHORD_SIG = 0;

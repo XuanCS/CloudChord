@@ -1,7 +1,0 @@
-Done 1. the whole system working on Eclipse
-2. Upload/Download from Google drive and remove local copy. For download, also remove cloud copy
-Done 3. local file for <fileName, googleFileID>
-
-Done client.jason path
-
-test locally

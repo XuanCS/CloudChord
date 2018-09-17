@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class FileUtils {
 
@@ -105,16 +106,35 @@ public class FileUtils {
 		}
 		return f;
 	}
+	
+	public static String isFromSentProp(String splitFile, String DirName) {
+		String propFileName = DirName + Helper.SENT_FILE_LIST;
+		String res = Props.seekProp(splitFile, propFileName);
+		 if(res == null) {
+			 return "";
+		 }
+		 return res;
+	}
+	
+	// assume it is from sentProp
+	public static boolean isSameIPport( String splitFile, String DirName, String targetSock, InetSocketAddress localAddress) {	
+		String targetIP = targetSock.split(" ")[0];
+		String targetPortNum = targetSock.split(" ")[1];
+		
+		String localIP = localAddress.getAddress().toString().split("/")[1];
+		String localPortNum = Integer.toString(localAddress.getPort());
+		return targetIP.equals(localIP) && targetPortNum.equals(localPortNum);
+	}
 
 	public static void updateSentPropFile(String fileName, String DirName, String sentSockStr) {
 		String propFileName = DirName + Helper.SENT_FILE_LIST;
 		Props.updateProp(fileName, sentSockStr, propFileName);
 	}
 
-	public static void updateNamePropFile(String oldName, String DirName, String hashName) {
-		String propFileName = DirName + Helper.NAME_LIST;
-		Props.updateProp(oldName, hashName, propFileName);
-	}
+//	public static void updateNamePropFile(String oldName, String DirName, String hashName) {
+//		String propFileName = DirName + Helper.NAME_LIST;
+//		Props.updateProp(oldName, hashName, propFileName);
+//	}
 
 	public static void renameFile(String oldName, String newName, String dirName) {
 		String oldFilePath = getLocalFileName(oldName, dirName);
