@@ -21,8 +21,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -49,10 +51,10 @@ public class Helper {
 	// private static String prefix = "recv_";
 	public static final String DOWNLOADS = "_Downloads";
 	public static final String chordPrefix = "Chord_";
+	public static final String cpPrefix = "cp_";
+
 	public static final String SENT_FILE_LIST = "/sent_file.props";
-//	public static final String RECV_FILE_LIST = "/recv_file.props";
 	public static final String CLOUD_LIST = "/cloud.props";
-//	public static final String NAME_LIST = "/name.props";
 	public static final String CLIENT_SECRET = "client_secret.json";
 
 	public static final int CHORD_SIG = 0;
@@ -602,5 +604,18 @@ public class Helper {
 //		}
 		return msg;
 	}
-
+	
+	// just generate one copy
+	public static List<String> genTotalList(List<String> splitList, String DirName) {
+		List<String> cpList = new ArrayList<>();
+		for (String splitFile : splitList) {
+			String cpSplitFileName = Helper.cpPrefix + splitFile;
+			FileUtils.duplicateFile(splitFile, DirName, cpSplitFileName);
+			cpList.add(cpSplitFileName);
+		}
+		List<String> allList = new ArrayList<>();
+		allList.addAll(splitList);
+		allList.addAll(cpList);
+		return allList;
+	}
 }

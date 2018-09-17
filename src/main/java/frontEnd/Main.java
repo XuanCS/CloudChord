@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -253,16 +254,16 @@ public class Main {
 				String inputFileName = uploadField.getText();
 				checkInputFile(inputFileName);
 
-				// String splitFile = inputFileName;
-
 				// encrypt and then split and delete the encode file
 				String encFileName = Encryption.EncodePrefix + inputFileName;
 				Encryption.encrypt(inputFileName, DirName, encFileName);
 				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
 				FileUtils.deletelocalFile(DirName, encFileName);
-
+				// generate all List
+				List<String> allList = Helper.genTotalList(splitList, DirName);
+			
 				// send out the each of file
-				for (String splitFile : splitList) {
+				for (String splitFile : allList) {
 					System.out.println("\nCurrent Split File: " + splitFile);
 
 					// send out the split file
@@ -305,6 +306,7 @@ public class Main {
 					// delete all the split files
 					FileUtils.deletelocalFile(DirName, hashFileName);
 				}
+			
 			}
 		});
 
@@ -394,13 +396,11 @@ public class Main {
 
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
-//		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
 
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
 		FileUtils.createFile(cloudPropName);
-//		FileUtils.createFile(namePropName);
 		FileUtils.createFile(sentPropName);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
