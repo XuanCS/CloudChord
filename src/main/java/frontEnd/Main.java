@@ -82,6 +82,7 @@ public class Main {
 	private String localPortNum;
 	private String DirName;
 	private long blockLen = 256;
+	private long lbLimit = 512;
 
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
@@ -167,6 +168,10 @@ public class Main {
 		clear.setBounds(lastX_loc, fourthLineY_loc, button_WIDTH, button_LG_HEIGHT);
 		// clear.setBackground(Color.BLUE);
 		clear.setOpaque(true);
+		
+		JButton checkBtn = new JButton("Check");
+		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		checkBtn.setOpaque(true);
 
 		// function for button
 		startBtn.addActionListener(new ActionListener() {
@@ -284,14 +289,13 @@ public class Main {
 						InetSocketAddress result = getFileSuccessor(hashFileName);
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
-							gc.uploadTextFile(hashFileName);
+							gc.uploadTextFile(hashFileName, DirName);
 
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully upload file: " + splitFile);
 						} else {
-							String localSock = local_ip + " " + localPortNum;
-							String tmp_response = Helper.sendFile(result, DirName, splitFile, localSock, false);
+							String tmp_response = Helper.sendFile(result, DirName, splitFile, false);
 							System.out.println("sending: " + splitFile + " success");
 							System.out.println("feedback: " + tmp_response);
 							output.setText(
@@ -371,7 +375,31 @@ public class Main {
 				downloadField.setText("");
 				illegalUpload.setText("");
 				illegalDownload.setText("");
+			}
+		});
+		
+		// need to send to successor
+		checkBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (totalFileSize >= lbLimit) {
+					// get target file name
+					String propFileName = DirName + Helper.CLOUD_LIST;
+					String randFileName = Props.getRandPropFile(propFileName);
+					
+					// get node info, keep track of where file comes from
+					byte[] byteArr = FileUtils.readFile(randFileName, DirName);
+					
+					// send file to the successor
+					String localSock = local_ip + " " + localPortNum;
+					InetSocketAddress successor = m_node.getSuccessor();
+					boolean isLastNode = checkLastNode();
 
+					System.out.println("Current Node is Last One: " + isLastNode);
+					System.out.println("local: " + localAddress);
+					Helper.downSendOneCloudFile(randFileName, DirName, localSock, successor, isLastNode);
+						
+				}
 			}
 		});
 
@@ -391,6 +419,7 @@ public class Main {
 		panel.add(downloadBtn);
 		panel.add(quitBtn);
 		panel.add(clear);
+		panel.add(checkBtn);
 		panel.add(output);
 
 		frame.add(panel);

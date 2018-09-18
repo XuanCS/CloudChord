@@ -142,12 +142,12 @@ public class FileUtils {
 		File file = new File(oldFilePath);
 		File file2 = new File(newFilePath);
 
-		if (file2.exists())
-			try {
-				throw new java.io.IOException("file exists");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//		if (file2.exists())
+//			try {
+//				throw new java.io.IOException("file exists");
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 
 		// Rename file (or directory)
 		boolean success = file.renameTo(file2);

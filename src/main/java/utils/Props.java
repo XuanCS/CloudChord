@@ -112,6 +112,33 @@ public class Props {
 		}
 		return null;
 	}
+	
+	public static String getRandPropFile(String propFileName) {
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
+
+			Properties props = new Properties();
+			props.load(in);
+			in.close();
+
+			// Iterating properties using For-Each
+			Set<String> keys = props.stringPropertyNames();
+			for (String str : keys) {
+				if (str.length() > 0) {
+					return str;
+				}
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
+	}
 
 	private static String findSameKey(Set<String> keys,String target,  Properties props) {
 		for (String key : keys) {

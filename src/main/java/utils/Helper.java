@@ -375,7 +375,7 @@ public class Helper {
 	 * Send File to server and read response
 	 * 
 	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String localSock,
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName,
 			boolean fromDownFolder) {
 		// invalid input
 		if (server == null || fileName == null)
@@ -398,7 +398,7 @@ public class Helper {
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
 			System.out.println("Sending " + fileName);
 
-			FileMsg msg = prepUploadMsg(dirName, fileName, localSock, fromDownFolder, fileSize, myByteArray);
+			FileMsg msg = prepUploadMsg(dirName, fileName, fromDownFolder, fileSize, myByteArray);
 			outputStream.writeObject(msg);
 			if (fromDownFolder) {
 				FileUtils.deletelocalFile(downLoadDirName, fileName);
@@ -492,11 +492,13 @@ public class Helper {
 					System.out.println("need to inialize local directory first");
 				}
 				String fileName = uploadFileInfo(msg, dirName);
+				FileMsg file = (FileMsg) msg;
+				String localSockDir = file.getFileSockInfo();
 
 				// upload to cloud
 				System.out.println("uploading to cloud...");
 				Gcloud gc = new Gcloud(dirName);
-				gc.uploadTextFile(fileName);
+				gc.uploadTextFile(fileName, localSockDir);
 				FileUtils.deletelocalFile(dirName, fileName);
 				res = fileCmd;
 			} else if (type == DOWNLOAD_SIG) {
@@ -549,7 +551,7 @@ public class Helper {
 				} else {
 					gc.downLoadFile(key);
 					gc.directDelFile(res);
-					String tmp_response = Helper.sendFile(successor, dirName, key, localSock, true);
+					String tmp_response = Helper.sendFile(successor, dirName, key, true);
 					System.out.println("sending: " + key + " success");
 					System.out.println("feedback: " + tmp_response);
 				}
@@ -561,6 +563,22 @@ public class Helper {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	public static void downSendOneCloudFile(String fileName, String dirName, String localSock,
+			InetSocketAddress successor, boolean isLastNode) {
+		String propFileName = dirName + Helper.CLOUD_LIST;
+		String res = Props.readProp(fileName, propFileName);
+		Gcloud gc = new Gcloud(dirName);
+		if (isLastNode) {
+			gc.directDelFile(res);
+		} else {
+			gc.downLoadFile(res);
+			gc.directDelFile(res);
+			String tmp_response = Helper.sendFile(successor, dirName, fileName, true);
+			System.out.println("sending: " + fileName + " success");
+			System.out.println("feedback: " + tmp_response);
 		}
 	}
 
@@ -588,23 +606,25 @@ public class Helper {
 		System.out.println("Object received: " + msg);
 	}
 
-	private static FileMsg prepUploadMsg(String dirName, String fileName, String localSock, boolean fromDownFolder,
+	private static FileMsg prepUploadMsg(String dirName, String fileName, boolean fromDownFolder,
 			int fileSize, byte[] myByteArray) {
 
 		FileMsg msg = new FileMsg(UPLOAD_SIG, Helper.fileCmd);
 		msg.setFileName(fileName);
 		msg.setFileSize(fileSize);
 		msg.setContents(myByteArray);
-//		if (fromDownFolder) {
-//			String propFileName = dirName + Helper.RECV_FILE_LIST;
-//			String homeSockInfo = Props.seekProp(fileName, propFileName);
-//			msg.setFileSockInfo(homeSockInfo);
-//		} else {
-//			msg.setFileSockInfo(localSock);
-//		}
+		msg.setFileSockInfo(dirName);
+
+		// if (fromDownFolder) {
+		// String propFileName = dirName + Helper.RECV_FILE_LIST;
+		// String homeSockInfo = Props.seekProp(fileName, propFileName);
+		// msg.setFileSockInfo(homeSockInfo);
+		// } else {
+		// msg.setFileSockInfo(localSock);
+		// }
 		return msg;
 	}
-	
+
 	// just generate one copy
 	public static List<String> genTotalList(List<String> splitList, String DirName) {
 		List<String> cpList = new ArrayList<>();
@@ -617,5 +637,10 @@ public class Helper {
 		allList.addAll(splitList);
 		allList.addAll(cpList);
 		return allList;
+	}
+	
+	public static String genCldProPrefix(String fileSockDir, String title) {
+		String chordNum = fileSockDir.split("_")[1];
+		return chordNum + "_" + title;
 	}
 }
