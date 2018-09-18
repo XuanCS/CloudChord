@@ -154,7 +154,7 @@ public class Gcloud {
 			if (res != null) {
 				System.out.println("successfully upload: " + title);
 				String propFileName = dirName + Helper.CLOUD_LIST;
-				String propFileTitle = Helper.genCldProPrefix(fileSockDir, title);
+				String propFileTitle = Helper.genCldProSurfix(fileSockDir, title);
 				Props.updateProp(propFileTitle, res, propFileName);
 				Main.totalFileSize += fileSize;
 			}		
@@ -163,12 +163,11 @@ public class Gcloud {
 			e.printStackTrace();
 		}
 		return res;
-
 	}
 
 	public void downLoadFile(String targetFN) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
-		String res = Props.readProp(targetFN, propFileName);
+		String res = Props.findPrefixValue(targetFN, propFileName);
 		if (res == null) {
 			System.out.println("cannot download the target file");
 			return;

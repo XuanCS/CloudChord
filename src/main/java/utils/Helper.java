@@ -639,8 +639,12 @@ public class Helper {
 		return allList;
 	}
 	
-	public static String genCldProPrefix(String fileSockDir, String title) {
+	public static String genCldProSurfix(String fileSockDir, String title) {
 		String chordNum = fileSockDir.split("_")[1];
-		return chordNum + "_" + title;
+		return title + "_" + chordNum;
+	}
+	
+	public static String getCldFileName(String targetFN) {
+		return targetFN.split("_")[1];
 	}
 }
