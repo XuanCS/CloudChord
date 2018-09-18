@@ -59,6 +59,8 @@ public class Main {
 	public static final int belowThirdLineY_loc = 210;
 	public static final int fourthLineY_loc = 245;
 	public static final int lastLineY_loc = 400;
+	
+	public static long totalFileSize = 0;
 
 	private JFrame frame;
 	private JTextArea output;
@@ -302,11 +304,12 @@ public class Main {
 						String sentSockStr = result.getHostString() + " " + result.getPort();
 						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);
 					}
+					
+					System.out.println("cur total size: " + totalFileSize);
 
 					// delete all the split files
 					FileUtils.deletelocalFile(DirName, hashFileName);
-				}
-			
+				}		
 			}
 		});
 

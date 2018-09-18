@@ -14,6 +14,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 
+import frontEnd.Main;
 import utils.FileUtils;
 import utils.Helper;
 import utils.Props;
@@ -57,6 +58,7 @@ public class Gcloud {
 
 	private static Drive service;
 	private static String dirName;
+
 
 	/**
 	 * Global instance of the scopes required by this quickstart.
@@ -137,6 +139,7 @@ public class Gcloud {
 		body.setMimeType("text/plain");
 		java.io.File fileContent = new java.io.File(filePath);
 		FileContent mediaContent = new FileContent("text/plain", fileContent);
+		long fileSize = fileContent.length();
 		if (service.files() == null) {
 			System.out.println("service is null");
 		}
@@ -150,10 +153,10 @@ public class Gcloud {
 
 			if (res != null) {
 				System.out.println("successfully upload: " + title);
-			}
-
-			String propFileName = dirName + Helper.CLOUD_LIST;
-			Props.updateProp(title, res, propFileName);
+				String propFileName = dirName + Helper.CLOUD_LIST;
+				Props.updateProp(title, res, propFileName);
+				Main.totalFileSize += fileSize;
+			}		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
