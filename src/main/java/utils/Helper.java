@@ -511,12 +511,16 @@ public class Helper {
 				FileMsg file = (FileMsg) msg;
 				String encfileName = file.getFileName();
 				String sucNode = new String(file.getContents());
+				System.out.println("encfileName: " + encfileName);
+				System.out.println("sucNode: " + sucNode);
 				
 				String nameProp = dirName + Helper.NAME_LIST;
 				String sentProp = dirName + Helper.SENT_FILE_LIST;
 
-				String srcFileName = Props.seekProp(encfileName, nameProp);				
+				String srcFileName = Props.seekProp(encfileName, nameProp);	
+				System.out.println("srcFileName: " + srcFileName);
 				Props.updateProp(srcFileName, sucNode, sentProp);
+				System.out.println("succesfully update dest of " + srcFileName + "to " + sucNode);
 			} else {
 				System.out.println("ERROR CMD, please Resend");
 				return null;

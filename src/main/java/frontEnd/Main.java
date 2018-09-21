@@ -384,32 +384,39 @@ public class Main {
 		checkBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (totalFileSize >= lbLimit) {				
+				totalFileSize = 512;
+				if (totalFileSize >= lbLimit) {
 					InetSocketAddress successor = m_node.getSuccessor();
 
 					// get target file name
 					String propFileName = DirName + Helper.CLOUD_LIST;
 					String randFileName = Props.getRandPropFile(propFileName);
+					System.out.println("randFile: " + randFileName);
 
 					// send file to the successor
 					boolean isLastNode = checkLastNode();
+					if (!isLastNode) {
 
-					System.out.println("Current Node is Last One: " + isLastNode);
-					System.out.println("local: " + localAddress);
-					Helper.downSendOneCloudFile(randFileName, DirName, successor, isLastNode);
-					
-					// get node info, keep track of where file comes from
-					String oriFileNode = randFileName.split("_")[1];
-					
-					String succIP = successor.getAddress().toString().split("/")[1];
-					String succPort = Integer.toString(successor.getPort());
-					String succSock = succIP + " " + succPort;
-					
-					String srcIP = oriFileNode.split(" ")[0];
-					String srcPort = oriFileNode.split(" ")[1];
-					InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);					
-				
-					Helper.sendSentPropSig(randFileName, succSock, srcSock);
+						System.out.println("Current Node is Last One: " + isLastNode);
+						System.out.println("local: " + localAddress);
+						 Helper.downSendOneCloudFile(randFileName, DirName, successor, isLastNode);
+
+						// get node info, keep track of where file comes from
+						String oriFileName = randFileName.split("_")[0];
+						String oriFileNode = randFileName.split("_")[1];
+						System.out.println("oriFileNode: " + oriFileNode);
+
+						String succIP = successor.getAddress().toString().split("/")[1];
+						String succPort = Integer.toString(successor.getPort());
+						String succSock = succIP + " " + succPort;
+						System.out.println("succSock: " + succSock);
+
+						String srcIP = oriFileNode.split(" ")[0];
+						String srcPort = oriFileNode.split(" ")[1];
+						InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);
+
+						 Helper.sendSentPropSig(oriFileName, succSock, srcSock);
+					}
 				}
 			}
 		});

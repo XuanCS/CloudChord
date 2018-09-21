@@ -146,7 +146,7 @@ public class Props {
 				return props.getProperty(target);
 			}
 		}
-		System.out.println("cannot file in local record");
+		System.out.println("cannot find file in local record");
 		return null;
 	}
 
