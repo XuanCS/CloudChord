@@ -144,8 +144,6 @@ public class Talker implements Runnable {
 			outputStream.writeObject(msg);
 			ret = "FINISH_SENDING_DOWNFILE";
 			FileUtils.deletelocalFile(dirName + Helper.DOWNLOADS, downfName);
-
-
 		}
 		else {
 			System.out.println("recv header: " + request);

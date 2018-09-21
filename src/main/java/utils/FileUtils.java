@@ -131,10 +131,10 @@ public class FileUtils {
 		Props.updateProp(fileName, sentSockStr, propFileName);
 	}
 
-//	public static void updateNamePropFile(String oldName, String DirName, String hashName) {
-//		String propFileName = DirName + Helper.NAME_LIST;
-//		Props.updateProp(oldName, hashName, propFileName);
-//	}
+	public static void updateNamePropFile(String encName, String srcName, String DirName) {
+		String propFileName = DirName + Helper.NAME_LIST;
+		Props.updateProp(encName, srcName, propFileName);
+	}
 
 	public static void renameFile(String oldName, String newName, String dirName) {
 		String oldFilePath = getLocalFileName(oldName, dirName);

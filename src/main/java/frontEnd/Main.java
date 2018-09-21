@@ -59,7 +59,7 @@ public class Main {
 	public static final int belowThirdLineY_loc = 210;
 	public static final int fourthLineY_loc = 245;
 	public static final int lastLineY_loc = 400;
-	
+
 	public static long totalFileSize = 0;
 
 	private JFrame frame;
@@ -168,7 +168,7 @@ public class Main {
 		clear.setBounds(lastX_loc, fourthLineY_loc, button_WIDTH, button_LG_HEIGHT);
 		// clear.setBackground(Color.BLUE);
 		clear.setOpaque(true);
-		
+
 		JButton checkBtn = new JButton("Check");
 		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		checkBtn.setOpaque(true);
@@ -232,7 +232,6 @@ public class Main {
 		});
 
 		quitBtn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
@@ -268,7 +267,7 @@ public class Main {
 				FileUtils.deletelocalFile(DirName, encFileName);
 				// generate all List
 				List<String> allList = Helper.genTotalList(splitList, DirName);
-			
+
 				// send out the each of file
 				for (String splitFile : allList) {
 					System.out.println("\nCurrent Split File: " + splitFile);
@@ -283,19 +282,22 @@ public class Main {
 					} else {
 						// rename the split file and update cloud.props
 						FileUtils.renameFile(splitFile, hashFileName, DirName);
-//						FileUtils.updateNamePropFile(splitFile, DirName, hashFileName);
+						// FileUtils.updateNamePropFile(splitFile, DirName,
+						// hashFileName);
+						String localSock = local_ip + " " + localPortNum;
+						System.out.println("sock: " + localSock);
 
 						// send out files
 						InetSocketAddress result = getFileSuccessor(hashFileName);
 						if (result.equals(localAddress)) {
 							Gcloud gc = new Gcloud(DirName);
-							gc.uploadTextFile(hashFileName, DirName);
+							gc.uploadTextFile(hashFileName, localSock);
 
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully upload file: " + splitFile);
 						} else {
-							String tmp_response = Helper.sendFile(result, DirName, splitFile, false);
+							String tmp_response = Helper.sendFile(result, localSock, splitFile, false);
 							System.out.println("sending: " + splitFile + " success");
 							System.out.println("feedback: " + tmp_response);
 							output.setText(
@@ -307,13 +309,14 @@ public class Main {
 						// keep track of all the uploaded files from current
 						String sentSockStr = result.getHostString() + " " + result.getPort();
 						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);
+						FileUtils.updateNamePropFile(hashFileName, splitFile, DirName);
 					}
-					
+
 					System.out.println("cur total size: " + totalFileSize);
 
 					// delete all the split files
 					FileUtils.deletelocalFile(DirName, hashFileName);
-				}		
+				}
 			}
 		});
 
@@ -333,7 +336,7 @@ public class Main {
 					if (targetSock.length() == 0) {
 						illegalDownload.setText("the target file does not belong with the current user");
 					} else {
-						String hashFileName = getFileHash(splitFile);						
+						String hashFileName = getFileHash(splitFile);
 						if (localAddress.equals(result)) {
 							Gcloud gc = new Gcloud(DirName);
 							gc.downLoadFile(hashFileName);
@@ -348,7 +351,7 @@ public class Main {
 									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
 									+ splitFile + " from target cloud account");
 						}
-						FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);						
+						FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);
 					}
 					System.out.println();
 				}
@@ -368,7 +371,6 @@ public class Main {
 		});
 
 		clear.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				uploadField.setText("");
@@ -377,28 +379,37 @@ public class Main {
 				illegalDownload.setText("");
 			}
 		});
-		
+
 		// need to send to successor
 		checkBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (totalFileSize >= lbLimit) {
+				if (totalFileSize >= lbLimit) {				
+					InetSocketAddress successor = m_node.getSuccessor();
+
 					// get target file name
 					String propFileName = DirName + Helper.CLOUD_LIST;
 					String randFileName = Props.getRandPropFile(propFileName);
-					
-					// get node info, keep track of where file comes from
-					byte[] byteArr = FileUtils.readFile(randFileName, DirName);
-					
+
 					// send file to the successor
-					String localSock = local_ip + " " + localPortNum;
-					InetSocketAddress successor = m_node.getSuccessor();
 					boolean isLastNode = checkLastNode();
 
 					System.out.println("Current Node is Last One: " + isLastNode);
 					System.out.println("local: " + localAddress);
-					Helper.downSendOneCloudFile(randFileName, DirName, localSock, successor, isLastNode);
-						
+					Helper.downSendOneCloudFile(randFileName, DirName, successor, isLastNode);
+					
+					// get node info, keep track of where file comes from
+					String oriFileNode = randFileName.split("_")[1];
+					
+					String succIP = successor.getAddress().toString().split("/")[1];
+					String succPort = Integer.toString(successor.getPort());
+					String succSock = succIP + " " + succPort;
+					
+					String srcIP = oriFileNode.split(" ")[0];
+					String srcPort = oriFileNode.split(" ")[1];
+					InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);					
+				
+					Helper.sendSentPropSig(randFileName, succSock, srcSock);
 				}
 			}
 		});
@@ -429,11 +440,13 @@ public class Main {
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
+		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
 
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
 		FileUtils.createFile(cloudPropName);
 		FileUtils.createFile(sentPropName);
+		FileUtils.createFile(namePropName);
 
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);

@@ -130,7 +130,7 @@ public class Gcloud {
 		return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 	}
 
-	public String uploadTextFile(String title, String fileSockDir) {
+	public String uploadTextFile(String title, String fileSock) {
 
 		String filePath = FileUtils.getLocalFileName(title, dirName);
 		File body = new File();
@@ -154,7 +154,7 @@ public class Gcloud {
 			if (res != null) {
 				System.out.println("successfully upload: " + title);
 				String propFileName = dirName + Helper.CLOUD_LIST;
-				String propFileTitle = Helper.genCldProSurfix(fileSockDir, title);
+				String propFileTitle = Helper.genCldProSurfix(fileSock, title);
 				Props.updateProp(propFileTitle, res, propFileName);
 				Main.totalFileSize += fileSize;
 			}		

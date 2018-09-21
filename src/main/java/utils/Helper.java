@@ -33,18 +33,6 @@ import fileSys.FileMsg;
 import fileSys.Msg;
 import fileSys.SigMsg;
 
-/**
- * A helper method that does the following things: (1) Hashing - for string, for
- * socket address, and integer number (2) Computation - relative id (one node is
- * how far behind another node), a address' hex string and its percentage
- * position in the ring (so we can easily draw the picture of ring!), address'
- * 8-digit hex string, the ith start of a node's finger table, power of two (to
- * avoid computation of power of 2 everytime we need it) (3) Network and address
- * services - send request to a node to get desired socket address/response,
- * create socket address object using string, read string from an input stream.
- *
- */
-
 public class Helper {
 
 	private static HashMap<Integer, Long> powerOfTwo = null;
@@ -55,12 +43,14 @@ public class Helper {
 
 	public static final String SENT_FILE_LIST = "/sent_file.props";
 	public static final String CLOUD_LIST = "/cloud.props";
+	public static final String NAME_LIST = "/name.props";
 	public static final String CLIENT_SECRET = "client_secret.json";
 
 	public static final int CHORD_SIG = 0;
 	public static final int UPLOAD_SIG = 1;
 	public static final int DOWNLOAD_SIG = 2;
 	public static final int FILESOCK_SIG = 3;
+	public static final int FILEMOVE_SIG = 4;
 
 	public static final String fileCmd = "FILE";
 
@@ -375,8 +365,7 @@ public class Helper {
 	 * Send File to server and read response
 	 * 
 	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName,
-			boolean fromDownFolder) {
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName, boolean fromDownFolder) {
 		// invalid input
 		if (server == null || fileName == null)
 			return null;
@@ -518,6 +507,16 @@ public class Helper {
 			} else if (type == FILESOCK_SIG) {
 				fileSockInfo(msg, dirName);
 				res = fileCmd;
+			} else if (type == FILEMOVE_SIG) {
+				FileMsg file = (FileMsg) msg;
+				String encfileName = file.getFileName();
+				String sucNode = new String(file.getContents());
+				
+				String nameProp = dirName + Helper.NAME_LIST;
+				String sentProp = dirName + Helper.SENT_FILE_LIST;
+
+				String srcFileName = Props.seekProp(encfileName, nameProp);				
+				Props.updateProp(srcFileName, sucNode, sentProp);
 			} else {
 				System.out.println("ERROR CMD, please Resend");
 				return null;
@@ -566,8 +565,23 @@ public class Helper {
 		}
 	}
 
-	public static void downSendOneCloudFile(String fileName, String dirName, String localSock,
-			InetSocketAddress successor, boolean isLastNode) {
+	public static void sendSentPropSig(String encFileName, String succNode, InetSocketAddress srcSock) {
+		Socket talkSocket = null;
+		try {
+			talkSocket = new Socket(srcSock.getAddress(), srcSock.getPort());
+			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
+			System.out.println("updating " + encFileName + "to " + succNode);
+			FileMsg msg = prepFileMvMsg(encFileName, succNode);
+			outputStream.writeObject(msg);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void downSendOneCloudFile(String fileName, String dirName, InetSocketAddress successor,
+			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		String res = Props.readProp(fileName, propFileName);
 		Gcloud gc = new Gcloud(dirName);
@@ -606,22 +620,22 @@ public class Helper {
 		System.out.println("Object received: " + msg);
 	}
 
-	private static FileMsg prepUploadMsg(String dirName, String fileName, boolean fromDownFolder,
-			int fileSize, byte[] myByteArray) {
+	private static FileMsg prepUploadMsg(String dirName, String fileName, boolean fromDownFolder, int fileSize,
+			byte[] myByteArray) {
 
 		FileMsg msg = new FileMsg(UPLOAD_SIG, Helper.fileCmd);
 		msg.setFileName(fileName);
 		msg.setFileSize(fileSize);
 		msg.setContents(myByteArray);
 		msg.setFileSockInfo(dirName);
+		return msg;
+	}
 
-		// if (fromDownFolder) {
-		// String propFileName = dirName + Helper.RECV_FILE_LIST;
-		// String homeSockInfo = Props.seekProp(fileName, propFileName);
-		// msg.setFileSockInfo(homeSockInfo);
-		// } else {
-		// msg.setFileSockInfo(localSock);
-		// }
+	private static FileMsg prepFileMvMsg(String fileName, String sucNode) {
+		FileMsg msg = new FileMsg(FILEMOVE_SIG, Helper.fileCmd);
+		msg.setFileName(fileName);
+		byte[] myByteArray = sucNode.getBytes();
+		msg.setContents(myByteArray);
 		return msg;
 	}
 
@@ -638,13 +652,13 @@ public class Helper {
 		allList.addAll(cpList);
 		return allList;
 	}
-	
+
 	public static String genCldProSurfix(String fileSockDir, String title) {
-		String chordNum = fileSockDir.split("_")[1];
-		return title + "_" + chordNum;
+		return title + "_" + fileSockDir;
 	}
 	
-	public static String getCldFileName(String targetFN) {
-		return targetFN.split("_")[1];
-	}
+
+	// public static String getCldFileName(String targetFN) {
+	// return targetFN.split("_")[1];
+	// }
 }

@@ -192,6 +192,9 @@ public class Props {
 			Set<String> keys = props.stringPropertyNames();
 			for (String key : keys) {
 				if (key.startsWith((target))) {
+					System.out.println("key is: " + key);
+					String sock = key.split("_")[1];
+					System.out.println("sock is: " + sock);
 					return props.getProperty(key);
 				}
 			}
