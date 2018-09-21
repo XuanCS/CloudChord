@@ -297,8 +297,8 @@ public class Main {
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 											+ "\nsuccesfully upload file: " + splitFile);
 						} else {
-							String tmp_response = Helper.sendFile(result, localSock, splitFile, false);
-							System.out.println("sending: " + splitFile + " success");
+							String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
+							System.out.println("sending: " + splitFile + "(" + hashFileName+ ")" + " success");
 							System.out.println("feedback: " + tmp_response);
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)

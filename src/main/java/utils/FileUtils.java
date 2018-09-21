@@ -56,6 +56,7 @@ public class FileUtils {
 
 	public static byte[] readFile(String fileName, String dirName) {
 		String localFileName = FileUtils.getLocalFileName(fileName, dirName);
+		System.out.println("localFileName: " + localFileName);
 		File plainText = new File(localFileName);
 		if (!plainText.exists()) {
 			System.out.print(fileName + "File does not exit");
