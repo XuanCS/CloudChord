@@ -587,13 +587,15 @@ public class Helper {
 	public static void downSendOneCloudFile(String fileName, String dirName, InetSocketAddress successor,
 			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
-		String res = Props.readProp(fileName, propFileName);
+//		String res = Props.findPrefixKey(fileName, propFileName);
+		System.out.println("res key is: " + fileName);
+		String res = Props.findPrefixValue(fileName, propFileName);
 		Gcloud gc = new Gcloud(dirName);
 		if (isLastNode) {
 			gc.directDelFile(res);
 		} else {
-			gc.downLoadFile(res);
-			gc.directDelFile(res);
+			gc.downLoadFile(fileName);
+//			gc.directDelFile(res);
 			String tmp_response = Helper.sendFile(successor, dirName, fileName, true);
 			System.out.println("sending: " + fileName + " success");
 			System.out.println("feedback: " + tmp_response);

@@ -298,7 +298,7 @@ public class Main {
 											+ "\nsuccesfully upload file: " + splitFile);
 						} else {
 							String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
-							System.out.println("sending: " + splitFile + "(" + hashFileName+ ")" + " success");
+							System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
 							System.out.println("feedback: " + tmp_response);
 							output.setText(
 									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
@@ -396,15 +396,13 @@ public class Main {
 					// send file to the successor
 					boolean isLastNode = checkLastNode();
 					if (!isLastNode) {
-
-						System.out.println("Current Node is Last One: " + isLastNode);
-						System.out.println("local: " + localAddress);
-						 Helper.downSendOneCloudFile(randFileName, DirName, successor, isLastNode);
-
 						// get node info, keep track of where file comes from
 						String oriFileName = randFileName.split("_")[0];
 						String oriFileNode = randFileName.split("_")[1];
-						System.out.println("oriFileNode: " + oriFileNode);
+						System.out.println("oriFileName: " + oriFileName);
+
+						System.out.println("Current Node is Last One: " + isLastNode);
+						Helper.downSendOneCloudFile(oriFileName, DirName, successor, isLastNode);
 
 						String succIP = successor.getAddress().toString().split("/")[1];
 						String succPort = Integer.toString(successor.getPort());
@@ -415,7 +413,7 @@ public class Main {
 						String srcPort = oriFileNode.split(" ")[1];
 						InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);
 
-						 Helper.sendSentPropSig(oriFileName, succSock, srcSock);
+						Helper.sendSentPropSig(oriFileName, succSock, srcSock);
 					}
 				}
 			}

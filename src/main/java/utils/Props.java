@@ -180,6 +180,35 @@ public class Props {
 		return arrList;
 	}
 	
+	public static String findPrefixKey(String target, String propFileName) {
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFileName);
+			Properties props = new Properties();
+			props.load(in);
+			in.close();
+
+			// Iterating properties using For-Each
+			Set<String> keys = props.stringPropertyNames();
+			for (String key : keys) {
+				if (key.startsWith((target))) {
+					System.out.println("key is: " + key);
+					String sock = key.split("_")[1];
+					System.out.println("sock is: " + sock);
+					return key;
+				}
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static String findPrefixValue(String target, String propFileName) {
 		FileInputStream in;
 		try {

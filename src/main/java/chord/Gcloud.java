@@ -167,6 +167,7 @@ public class Gcloud {
 
 	public void downLoadFile(String targetFN) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
+		System.out.println("target FN: " + targetFN);
 		String res = Props.findPrefixValue(targetFN, propFileName);
 		if (res == null) {
 			System.out.println("cannot download the target file");
@@ -201,7 +202,7 @@ public class Gcloud {
 
 			service.files().delete(res).execute();
 			Props.rmPropKey(targetFN, propFileName);
-			System.out.println("succesfully delte target file");
+			System.out.println("succesfully delete target file");
 		} catch (IOException e) {
 			System.out.println("An error occurred: " + e);
 		}
