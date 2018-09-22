@@ -21,6 +21,7 @@ public class Node {
 	private Stabilize stabilize;
 	private FixFingers fix_fingers;
 	private AskPredecessor ask_predecessor;
+	private Timer timer;
 
 	/**
 	 * Constructor
@@ -45,6 +46,7 @@ public class Node {
 		stabilize = new Stabilize(this);
 		fix_fingers = new FixFingers(this);
 		ask_predecessor = new AskPredecessor(this);
+		timer = new Timer(this);
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class Node {
 		stabilize.start();
 		fix_fingers.start();
 		ask_predecessor.start();
-
+		timer.start();
 		return true;
 	}
 
