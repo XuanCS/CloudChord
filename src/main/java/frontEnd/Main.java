@@ -7,7 +7,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -73,6 +72,7 @@ public class Main implements ActionListener {
 
 	private JLabel illegalUpload;
 	private JLabel illegalDownload;
+	private JLabel illegalClick;
 
 	private static Node m_node;
 	private static InetSocketAddress m_contact;
@@ -88,6 +88,7 @@ public class Main implements ActionListener {
 		output = new JTextArea("");	
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
+		illegalClick = new JLabel();
 		m_helper = new Helper();		
 
 		try {
@@ -132,6 +133,10 @@ public class Main implements ActionListener {
 		illegalDownload.setBounds(thirdX_loc, belowThirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalDownload.setForeground(Color.RED);
 		panel.add(illegalDownload);
+		
+		illegalClick.setBounds(firstX_loc, thirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
+		illegalClick.setForeground(Color.RED);
+		panel.add(illegalClick);
 
 		// set field
 		starter = new JTextField();
@@ -160,10 +165,10 @@ public class Main implements ActionListener {
 		joinBtn.addActionListener(this);
 		panel.add(joinBtn);
 
-		JButton inforBtn = new JButton("About");
-		inforBtn.setBounds(thirdX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		inforBtn.addActionListener(this);
-		panel.add(inforBtn);
+		JButton aboutBtn = new JButton("About");
+		aboutBtn.setBounds(thirdX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		aboutBtn.addActionListener(this);
+		panel.add(aboutBtn);
 
 		JButton uploadBtn = new JButton("Upload");
 		uploadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
@@ -187,6 +192,7 @@ public class Main implements ActionListener {
 
 		JButton clearBtn = new JButton("Clear");
 		clearBtn.setBounds(lastX_loc, fifthLineY_loc, button_WIDTH, button_LG_HEIGHT);
+		clearBtn.addActionListener(this);
 		panel.add(clearBtn);
 	
 		JButton sentInfoBtn = new JButton("SentInfo");
@@ -252,16 +258,14 @@ public class Main implements ActionListener {
 	}
 	
 	private void startBtnCall() {
-		localPortNum = starter.getText();
-
 		// illegal check
-
+		
+		localPortNum = starter.getText();
 		startNodeAndFolder(localPortNum);
 		m_contact = m_node.getAddress();
 		isJoinRing();
-
-		Log.print("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+		Log.print("Initiate the Chord ring");
+		printCurNodeInfo();
 	}
 	
 	private void joinBtnCall() {
@@ -283,18 +287,22 @@ public class Main implements ActionListener {
 			return;
 		}
 		isJoinRing();
-		output.setText("Joining the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+		Log.print("Joining the Chord ring");
+		printCurNodeInfo();
 	}
 	
 	private void aboutBtnCall() {
-		String dir_name = starter.getText();
-		if (dir_name.length() == 0) {
+		if (!isClickOK()) {
 			return;
 		}
+		Log.print();
+		printCurNodeInfo();
 	}
 	
 	private void quitBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		InetSocketAddress successor = m_node.getSuccessor();
 		boolean isLastNode = Helper.checkLastNode(m_node, localAddress);
 
@@ -312,22 +320,34 @@ public class Main implements ActionListener {
 	}
 	
 	private void checkBtnCall() {
-		Log.print("hello");;
+
 	}
 	
 	private void sentInfoBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		Props.outputSentPropKV(DirName);
 	}
 	
 	private void cloudInfoBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		Props.outputCloudPropKV(DirName);
 	}
 	
 	private void nameInfoBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		Props.outputNamePropKV(DirName);
 	}
 	
 	private void uploadBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		// get file info, encryption and split file
 		String inputFileName = uploadField.getText();
 		FileUtils.checkInputFile(inputFileName, localAddress);
@@ -392,6 +412,9 @@ public class Main implements ActionListener {
 	}
 	
 	private void downloadBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
 		String inputFileName = downloadField.getText();
 		String encFileName = Encryption.EncodePrefix + inputFileName;
 		String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
@@ -442,6 +465,7 @@ public class Main implements ActionListener {
 		downloadField.setText("");
 		illegalUpload.setText("");
 		illegalDownload.setText("");
+		illegalClick.setText("");
 	}
 	
 	private void startNodeAndFolder(String localPortNum) {
@@ -469,6 +493,19 @@ public class Main implements ActionListener {
 		System.out.println("Joining the Chord ring.");
 		System.out.println("Local IP: " + local_ip);
 		m_node.printNeighbors();
+		return true;
+	}
+	
+	private void printCurNodeInfo() {
+		Log.print("Local IP: " + local_ip + ", \nLocal Port Num: " + localPortNum
+				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+	}
+	
+	private boolean isClickOK() {
+		if (starter.getText().length() == 0 && follower.getText().length() == 0) {
+			illegalClick.setText("Need to specify Initiate or Join PortNum above");
+			return false;
+		}
 		return true;
 	}
 
