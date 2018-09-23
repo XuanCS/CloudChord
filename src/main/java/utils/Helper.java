@@ -1,20 +1,10 @@
 package utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -22,13 +12,12 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import chord.Gcloud;
+import chord.Node;
 import fileSys.FileMsg;
 import fileSys.Msg;
 import fileSys.SigMsg;
@@ -53,6 +42,10 @@ public class Helper {
 	public static final int FILEMOVE_SIG = 4;
 
 	public static final String fileCmd = "FILE";
+	
+	public static final long blockLen = 256;
+	public static final long lbLimit = 512;
+	public static long totalFileSize = 0;
 
 	/**
 	 * Constructor
@@ -661,6 +654,19 @@ public class Helper {
 
 	public static String genCldProSurfix(String fileSockDir, String title) {
 		return title + "_" + fileSockDir;
+	}
+	
+	public static boolean checkLastNode(Node m_node, InetSocketAddress localAddress) {
+		// check whether this is the last node
+		InetSocketAddress successor = m_node.getSuccessor();
+		InetSocketAddress predecessor = m_node.getPredecessor();
+		boolean isRes = false;
+		if ((predecessor == null || predecessor.equals(localAddress))
+				&& (successor == null || successor.equals(localAddress))) {
+			isRes = true;
+			System.out.println("This is the last Node");
+		}
+		return isRes;
 	}
 	
 

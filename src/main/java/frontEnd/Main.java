@@ -25,7 +25,7 @@ import utils.Helper;
 import utils.Props;
 import utils.SplitFile;
 
-public class Main {
+public class Main implements ActionListener {
 
 	public static final int FRAME_WIDTH = 850;
 	public static final int FRAME_HEIGHT = 600;
@@ -48,6 +48,7 @@ public class Main {
 	public static final int secondX_loc = 300;
 	public static final int thirdX_loc = 450;
 	public static final int fourthX_loc = 550;
+	public static final int fifthX_loc = 650;
 	public static final int lastX_loc = 725;
 
 	public static final int aboveFirstLineY_loc = 10;
@@ -58,9 +59,8 @@ public class Main {
 	public static final int thirdLineY_loc = 175;
 	public static final int belowThirdLineY_loc = 210;
 	public static final int fourthLineY_loc = 245;
+	public static final int fifthLineY_loc = 315;
 	public static final int lastLineY_loc = 400;
-
-	public static long totalFileSize = 0;
 
 	private JFrame frame;
 	private JTextArea output;
@@ -76,13 +76,12 @@ public class Main {
 	private static Node m_node;
 	private static InetSocketAddress m_contact;
 	private static Helper m_helper;
-	private static InetSocketAddress localAddress;
+	public static InetSocketAddress localAddress;
 
 	private String local_ip = null;
 	private String localPortNum;
 	private String DirName;
-	private long blockLen = 256;
-	private long lbLimit = 512;
+
 
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
@@ -113,335 +112,306 @@ public class Main {
 
 		JLabel M_dir = new JLabel("Initiate");
 		M_dir.setBounds(firstX_loc, aboveFirstLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+		panel.add(M_dir);
 
 		JLabel M_star = new JLabel("Join");
 		M_star.setBounds(firstX_loc, aboveSecondLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+		panel.add(M_star);
 
 		JLabel info = new JLabel("Function");
 		info.setBounds(thirdX_loc, aboveFirstLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+		panel.add(info);
 
 		illegalUpload.setBounds(thirdX_loc, belowSecondLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalUpload.setForeground(Color.RED);
+		panel.add(illegalUpload);
 
 		illegalDownload.setBounds(thirdX_loc, belowThirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalDownload.setForeground(Color.RED);
+		panel.add(illegalDownload);
 
 		// set field
 		starter = new JTextField();
 		starter.setBounds(firstX_loc, firstLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		panel.add(starter);
 
 		follower = new JTextField();
 		follower.setBounds(firstX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		panel.add(follower);
 
 		uploadField = new JTextField();
-		uploadField.setBounds(fourthX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		uploadField.setBounds(fourthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		panel.add(uploadField);
 
 		downloadField = new JTextField();
-		downloadField.setBounds(fourthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		downloadField.setBounds(fourthX_loc, fourthLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		panel.add(downloadField);
 
-		// set button
 		JButton startBtn = new JButton("Start");
 		startBtn.setBounds(secondX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		startBtn.setOpaque(true);
+		startBtn.addActionListener(this);
+		panel.add(startBtn);
 
 		JButton joinBtn = new JButton("Join");
 		joinBtn.setBounds(secondX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
-		joinBtn.setOpaque(true);
+		joinBtn.addActionListener(this);
+		panel.add(joinBtn);
 
-		JButton inforBtn = new JButton("Info");
+		JButton inforBtn = new JButton("About");
 		inforBtn.setBounds(thirdX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		inforBtn.setOpaque(true);
-
-		JButton downloadBtn = new JButton("Download");
-		downloadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
-		downloadBtn.setOpaque(true);
+		inforBtn.addActionListener(this);
+		panel.add(inforBtn);
 
 		JButton uploadBtn = new JButton("Upload");
-		uploadBtn.setBounds(thirdX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
-		uploadBtn.setOpaque(true);
+		uploadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
+		uploadBtn.addActionListener(this);
+		panel.add(uploadBtn);
 
+		JButton downloadBtn = new JButton("Download");
+		downloadBtn.setBounds(thirdX_loc, fourthLineY_loc, button_WIDTH, button_HEIGHT);
+		downloadBtn.addActionListener(this);
+		panel.add(downloadBtn);
+		
 		JButton quitBtn = new JButton("Quit");
 		quitBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		quitBtn.setOpaque(true);
-
-		JButton clear = new JButton("Clear");
-		clear.setBounds(lastX_loc, fourthLineY_loc, button_WIDTH, button_LG_HEIGHT);
-		// clear.setBackground(Color.BLUE);
-		clear.setOpaque(true);
+		quitBtn.addActionListener(this);
+		panel.add(quitBtn);
 
 		JButton checkBtn = new JButton("Check");
 		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		checkBtn.setOpaque(true);
-
-		// function for button
-		startBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				localPortNum = starter.getText();
-
-				// illegal check
-
-				startNodeAndFolder(localPortNum);
-				m_contact = m_node.getAddress();
-				isJoinRing();
-
-				output.setText("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-						+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
-			}
-		});
-
-		joinBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				String introNode = follower.getText();
-
-				// illegal check
-
-				localPortNum = introNode.split(" ")[0];
-				String targetIP = introNode.split(" ")[1];
-				String targetIPPort = introNode.split(" ")[2];
-				System.out.println("port num: " + localPortNum);
-				System.out.println("join ip: " + targetIP);
-				System.out.println("join port num: " + targetIPPort);
-
-				startNodeAndFolder(localPortNum);
-				m_contact = Helper.createSocketAddress(targetIP + ":" + targetIPPort);
-				if (m_contact == null) {
-					System.out.println("Cannot find address you are trying to contact. Now exit.");
-					return;
-				}
-				isJoinRing();
-				output.setText("Joining the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-						+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
-
-			}
-		});
-
-		inforBtn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				String dir_name = starter.getText();
-				if (dir_name.length() == 0) {
-					return;
-				}
-			}
-		});
-
-		quitBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				InetSocketAddress successor = m_node.getSuccessor();
-				boolean isLastNode = checkLastNode();
-
-				System.out.println("Current Node is Last One: " + isLastNode);
-				System.out.println("local: " + localAddress);
-				// iterate all files in cloud
-				String localSock = local_ip + " " + localPortNum;
-
-				Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
-
-				m_node.stopAllThreads();
-				output.setText("send out all files from user's cloud account, Leaving the ring...");
-				System.out.println("Leaving the ring...");
-				System.exit(0);
-
-			}
-		});
-
-		uploadBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get file info, encryption and split file
-				String inputFileName = uploadField.getText();
-				checkInputFile(inputFileName);
-
-				// encrypt and then split and delete the encode file
-				String encFileName = Encryption.EncodePrefix + inputFileName;
-				Encryption.encrypt(inputFileName, DirName, encFileName);
-				List<String> splitList = SplitFile.split(encFileName, DirName, blockLen);
-				FileUtils.deletelocalFile(DirName, encFileName);
-				// generate all List
-				List<String> allList = Helper.genTotalList(splitList, DirName);
-
-				// send out the each of file
-				for (String splitFile : allList) {
-					System.out.println("\nCurrent Split File: " + splitFile);
-
-					// send out the split file
-					String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
-					File targetFile = new File(targetFilePath);
-					String hashFileName = getFileHash(splitFile);
-
-					if (!targetFile.exists()) {
-						illegalUpload.setText("the target file is not in the user's directory");
-					} else {
-						// rename the split file and update cloud.props
-						FileUtils.renameFile(splitFile, hashFileName, DirName);
-						// FileUtils.updateNamePropFile(splitFile, DirName,
-						// hashFileName);
-						String localSock = local_ip + " " + localPortNum;
-						System.out.println("sock: " + localSock);
-
-						// send out files
-						InetSocketAddress result = getFileSuccessor(hashFileName);
-						if (result.equals(localAddress)) {
-							Gcloud gc = new Gcloud(DirName);
-							gc.uploadTextFile(hashFileName, localSock);
-
-							output.setText(
-									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-											+ "\nsuccesfully upload file: " + splitFile);
-						} else {
-							String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
-							System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
-							System.out.println("feedback: " + tmp_response);
-							output.setText(
-									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-											+ "\nsuccesfully send file to successor cloud account, and upload file: "
-											+ splitFile);
-						}
-
-						// keep track of all the uploaded files from current
-						String sentSockStr = result.getHostString() + " " + result.getPort();
-						FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);
-						FileUtils.updateNamePropFile(hashFileName, splitFile, DirName);
-					}
-
-					System.out.println("cur total size: " + totalFileSize);
-
-					// delete all the split files
-					FileUtils.deletelocalFile(DirName, hashFileName);
-				}
-			}
-		});
-
-		downloadBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String inputFileName = downloadField.getText();
-				String encFileName = Encryption.EncodePrefix + inputFileName;
-				String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
-				List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
-
-				for (String splitFile : splitList) {
-					String targetSock = FileUtils.isFromSentProp(splitFile, DirName);
-					InetSocketAddress result = Helper
-							.createSocketAddress(targetSock.split(" ")[0] + ":" + targetSock.split(" ")[1]);
-
-					if (targetSock.length() == 0) {
-						illegalDownload.setText("the target file does not belong with the current user");
-					} else {
-						String hashFileName = getFileHash(splitFile);
-						if (localAddress.equals(result)) {
-							Gcloud gc = new Gcloud(DirName);
-							gc.downLoadFile(hashFileName);
-							output.setText(
-									"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-											+ "\nsuccesfully download file: " + splitFile);
-
-						} else {
-							String res = Helper.sendQueryFile(result, DirName, hashFileName);
-							System.out.println("feedback: " + res);
-							output.setText("file " + splitFile + ", Position is "
-									+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
-									+ splitFile + " from target cloud account");
-						}
-						FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);
-					}
-					System.out.println();
-				}
-
-				// join and decrpt
-				String downloadFolder = DirName + Helper.DOWNLOADS;
-				SplitFile.join(encFileName, downloadFolder);
-				Encryption.decrpt(encFileName, DirName, inputFileName);
-
-				// delete encoded file and split files
-				for (String splitFile : splitList) {
-					FileUtils.deletelocalFile(downloadFolder, splitFile);
-				}
-				FileUtils.deletelocalFile(downloadFolder, encFileName);
-
-			}
-		});
-
-		clear.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				uploadField.setText("");
-				downloadField.setText("");
-				illegalUpload.setText("");
-				illegalDownload.setText("");
-			}
-		});
-
-		// need to send to successor
-		checkBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				totalFileSize = 512;
-				if (totalFileSize >= lbLimit) {
-					InetSocketAddress successor = m_node.getSuccessor();
-
-					// get target file name
-					String propFileName = DirName + Helper.CLOUD_LIST;
-					String randFileName = Props.getRandPropFile(propFileName);
-					System.out.println("randFile: " + randFileName);
-
-					// send file to the successor
-					boolean isLastNode = checkLastNode();
-					if (!isLastNode) {
-						// get node info, keep track of where file comes from
-						String oriFileName = randFileName.split("_")[0];
-						String oriFileNode = randFileName.split("_")[1];
-						System.out.println("oriFileName: " + oriFileName);
-
-						System.out.println("Current Node is Last One: " + isLastNode);
-						Helper.downSendOneCloudFile(oriFileName, DirName, successor, isLastNode);
-
-						String succIP = successor.getAddress().toString().split("/")[1];
-						String succPort = Integer.toString(successor.getPort());
-						String succSock = succIP + " " + succPort;
-						System.out.println("succSock: " + succSock);
-
-						String srcIP = oriFileNode.split(" ")[0];
-						String srcPort = oriFileNode.split(" ")[1];
-						InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);
-
-						Helper.sendSentPropSig(oriFileName, succSock, srcSock);
-					}
-				}
-			}
-		});
-
-		panel.add(M_dir);
-		panel.add(M_star);
-		panel.add(starter);
-		panel.add(follower);
-		panel.add(uploadField);
-		panel.add(downloadField);
-		panel.add(illegalUpload);
-		panel.add(illegalDownload);
-		panel.add(info);
-		panel.add(startBtn);
-		panel.add(joinBtn);
-		panel.add(inforBtn);
-		panel.add(uploadBtn);
-		panel.add(downloadBtn);
-		panel.add(quitBtn);
-		panel.add(clear);
 		panel.add(checkBtn);
-		panel.add(output);
 
+		JButton clearBtn = new JButton("Clear");
+		clearBtn.setBounds(lastX_loc, fifthLineY_loc, button_WIDTH, button_LG_HEIGHT);
+		panel.add(clearBtn);
+	
+		JButton sentInfoBtn = new JButton("SentInfo");
+		sentInfoBtn.setBounds(thirdX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
+		sentInfoBtn.addActionListener(this);
+		panel.add(sentInfoBtn);
+
+		JButton cloudInfoBtn = new JButton("CloudInfo");
+		cloudInfoBtn.setBounds(fourthX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
+		cloudInfoBtn.addActionListener(this);
+		panel.add(cloudInfoBtn);
+
+		JButton nameInfoBtn = new JButton("NameInfo");
+		nameInfoBtn.setBounds(fifthX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
+		nameInfoBtn.addActionListener(this);
+		panel.add(nameInfoBtn);
+
+		panel.add(output);
 		frame.add(panel);
 		frame.setVisible(true);
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String str = e.getActionCommand();
+		switch (str) {
+		case "Start":
+			startBtnCall();
+			break;
+		case "Join":
+			joinBtnCall();
+			break;
+		case "Quit":
+			quitBtnCall();
+			break;
+		case "About":
+			aboutBtnCall();
+			break;
+		case "Upload":
+			uploadBtnCall();
+			break;
+		case "Download":
+			downloadBtnCall();
+			break;
+		case "Clear":
+			clearBtnCall();
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private void startBtnCall() {
+		localPortNum = starter.getText();
 
+		// illegal check
+
+		startNodeAndFolder(localPortNum);
+		m_contact = m_node.getAddress();
+		isJoinRing();
+
+		output.setText("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
+				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+	}
+	
+	private void joinBtnCall() {
+		String introNode = follower.getText();
+
+		// illegal check
+
+		localPortNum = introNode.split(" ")[0];
+		String targetIP = introNode.split(" ")[1];
+		String targetIPPort = introNode.split(" ")[2];
+		System.out.println("port num: " + localPortNum);
+		System.out.println("join ip: " + targetIP);
+		System.out.println("join port num: " + targetIPPort);
+
+		startNodeAndFolder(localPortNum);
+		m_contact = Helper.createSocketAddress(targetIP + ":" + targetIPPort);
+		if (m_contact == null) {
+			System.out.println("Cannot find address you are trying to contact. Now exit.");
+			return;
+		}
+		isJoinRing();
+		output.setText("Joining the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
+				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+	}
+	
+	private void quitBtnCall() {
+		InetSocketAddress successor = m_node.getSuccessor();
+		boolean isLastNode = Helper.checkLastNode(m_node, localAddress);
+
+		System.out.println("Current Node is Last One: " + isLastNode);
+		System.out.println("local: " + localAddress);
+		// iterate all files in cloud
+		String localSock = local_ip + " " + localPortNum;
+
+		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
+
+		m_node.stopAllThreads();
+		output.setText("send out all files from user's cloud account, Leaving the ring...");
+		System.out.println("Leaving the ring...");
+		System.exit(0);
+	}
+	
+	private void aboutBtnCall() {
+		String dir_name = starter.getText();
+		if (dir_name.length() == 0) {
+			return;
+		}
+	}
+	
+	private void uploadBtnCall() {
+		// get file info, encryption and split file
+		String inputFileName = uploadField.getText();
+		FileUtils.checkInputFile(inputFileName, localAddress);
+
+		// encrypt and then split and delete the encode file
+		String encFileName = Encryption.EncodePrefix + inputFileName;
+		Encryption.encrypt(inputFileName, DirName, encFileName);
+		List<String> splitList = SplitFile.split(encFileName, DirName, Helper.blockLen);
+		FileUtils.deletelocalFile(DirName, encFileName);
+		// generate all List
+		List<String> allList = Helper.genTotalList(splitList, DirName);
+
+		// send out the each of file
+		for (String splitFile : allList) {
+			System.out.println("\nCurrent Split File: " + splitFile);
+
+			// send out the split file
+			String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
+			File targetFile = new File(targetFilePath);
+			String hashFileName = FileUtils.getFileHash(splitFile);
+
+			if (!targetFile.exists()) {
+				illegalUpload.setText("the target file is not in the user's directory");
+			} else {
+				// rename the split file and update cloud.props
+				FileUtils.renameFile(splitFile, hashFileName, DirName);
+				// FileUtils.updateNamePropFile(splitFile, DirName,
+				// hashFileName);
+				String localSock = local_ip + " " + localPortNum;
+				System.out.println("sock: " + localSock);
+
+				// send out files
+				InetSocketAddress result = FileUtils.getFileSuccessor(hashFileName, localAddress);
+				if (result.equals(localAddress)) {
+					Gcloud gc = new Gcloud(DirName);
+					gc.uploadTextFile(hashFileName, localSock);
+
+					output.setText(
+							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+									+ "\nsuccesfully upload file: " + splitFile);
+				} else {
+					String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
+					System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
+					System.out.println("feedback: " + tmp_response);
+					output.setText(
+							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+									+ "\nsuccesfully send file to successor cloud account, and upload file: "
+									+ splitFile);
+				}
+
+				// keep track of all the uploaded files from current
+				String sentSockStr = result.getHostString() + " " + result.getPort();
+				FileUtils.updateSentPropFile(splitFile, DirName, sentSockStr);
+				FileUtils.updateNamePropFile(hashFileName, splitFile, DirName);
+			}
+
+			System.out.println("cur total size: " + Helper.totalFileSize);
+
+			// delete all the split files
+			FileUtils.deletelocalFile(DirName, hashFileName);
+		}
+	}
+	
+	private void downloadBtnCall() {
+		String inputFileName = downloadField.getText();
+		String encFileName = Encryption.EncodePrefix + inputFileName;
+		String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
+		List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
+
+		for (String splitFile : splitList) {
+			String targetSock = FileUtils.isFromSentProp(splitFile, DirName);
+			InetSocketAddress result = Helper
+					.createSocketAddress(targetSock.split(" ")[0] + ":" + targetSock.split(" ")[1]);
+
+			if (targetSock.length() == 0) {
+				illegalDownload.setText("the target file does not belong with the current user");
+			} else {
+				String hashFileName = FileUtils.getFileHash(splitFile);
+				if (localAddress.equals(result)) {
+					Gcloud gc = new Gcloud(DirName);
+					gc.downLoadFile(hashFileName);
+					output.setText(
+							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+									+ "\nsuccesfully download file: " + splitFile);
+
+				} else {
+					String res = Helper.sendQueryFile(result, DirName, hashFileName);
+					System.out.println("feedback: " + res);
+					output.setText("file " + splitFile + ", Position is "
+							+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
+							+ splitFile + " from target cloud account");
+				}
+				FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);
+			}
+			System.out.println();
+		}
+
+		// join and decrpt
+		String downloadFolder = DirName + Helper.DOWNLOADS;
+		SplitFile.join(encFileName, downloadFolder);
+		Encryption.decrpt(encFileName, DirName, inputFileName);
+
+		// delete encoded file and split files
+		for (String splitFile : splitList) {
+			FileUtils.deletelocalFile(downloadFolder, splitFile);
+		}
+		FileUtils.deletelocalFile(downloadFolder, encFileName);
+	}
+	
+	private void clearBtnCall() {
+		uploadField.setText("");
+		downloadField.setText("");
+		illegalUpload.setText("");
+		illegalDownload.setText("");
+	}
+	
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
@@ -470,49 +440,8 @@ public class Main {
 		return true;
 	}
 
-	private boolean checkInputFile(String fileName) {
-		long hash = Helper.hashString(fileName);
-		// System.out.println("Hash value is " + Long.toHexString(hash));
-		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
-
-		// if fail to send request, local node is disconnected, exit
-		if (result == null) {
-			System.out.println("The node your are contacting is disconnected. Now exit.");
-			System.exit(0);
-		}
-		return true;
-	}
-
-	private String getFileHash(String fileName) {
-		long hash = Helper.hashString(fileName);
-		String res = Long.toHexString(hash);
-		return res;
-	}
-
-	private InetSocketAddress getFileSuccessor(String fileName) {
-		long hash = Helper.hashString(fileName);
-		System.out.println("Hash value is " + Long.toHexString(hash));
-		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
-		return result;
-	}
-
-	private boolean checkLastNode() {
-		// check whether this is the last node
-		InetSocketAddress successor = m_node.getSuccessor();
-		InetSocketAddress predecessor = m_node.getPredecessor();
-		boolean isRes = false;
-		if ((predecessor == null || predecessor.equals(localAddress))
-				&& (successor == null || successor.equals(localAddress))) {
-			isRes = true;
-			System.out.println("This is the last Node");
-		}
-		return isRes;
-	}
-
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Main user = new Main();
 		user.mainFrame();
 	}
-
 }

@@ -158,4 +158,30 @@ public class FileUtils {
 			System.out.println("rename success");
 		}
 	}
+	
+	public static String getFileHash(String fileName) {
+		long hash = Helper.hashString(fileName);
+		String res = Long.toHexString(hash);
+		return res;
+	}
+	
+	public static InetSocketAddress getFileSuccessor(String fileName, InetSocketAddress localAddress) {
+		long hash = Helper.hashString(fileName);
+		System.out.println("Hash value is " + Long.toHexString(hash));
+		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
+		return result;
+	}
+	
+	public static boolean checkInputFile(String fileName, InetSocketAddress localAddress) {
+		long hash = Helper.hashString(fileName);
+		// System.out.println("Hash value is " + Long.toHexString(hash));
+		InetSocketAddress result = Helper.requestAddress(localAddress, "FINDSUCC_" + hash);
+
+		// if fail to send request, local node is disconnected, exit
+		if (result == null) {
+			System.out.println("The node your are contacting is disconnected. Now exit.");
+			System.exit(0);
+		}
+		return true;
+	}
 }

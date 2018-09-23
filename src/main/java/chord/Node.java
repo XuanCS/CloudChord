@@ -46,7 +46,7 @@ public class Node {
 		stabilize = new Stabilize(this);
 		fix_fingers = new FixFingers(this);
 		ask_predecessor = new AskPredecessor(this);
-		timer = new Timer(this);
+		timer = new Timer(this, dirName);
 	}
 
 	/**
