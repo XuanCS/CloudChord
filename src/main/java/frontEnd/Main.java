@@ -85,18 +85,10 @@ public class Main implements ActionListener {
 
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
-		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-
-		output = new JTextArea("");
-		output.setEditable(false);
-		output.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
-		
+		output = new JTextArea("");	
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
-		m_helper = new Helper();
-		
+		m_helper = new Helper();		
 
 		try {
 			local_ip = InetAddress.getLocalHost().getHostAddress();
@@ -107,6 +99,16 @@ public class Main implements ActionListener {
 	}
 
 	public void mainFrame() {
+		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
+		
+		output.setEditable(false);
+		output.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
+		
+		JScrollPane taScroll = new JScrollPane(output); // Adds the scrolls when there are too much text.
+		taScroll.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
+		
 		// set label
 		JPanel panel = new JPanel();
 		panel.setLayout(null); // add components by coordinates
@@ -202,8 +204,7 @@ public class Main implements ActionListener {
 		nameInfoBtn.addActionListener(this);
 		panel.add(nameInfoBtn);
 
-		panel.add(output);
-
+		panel.add(taScroll);
 		frame.add(panel);
 		frame.setVisible(true);
 	}
@@ -260,7 +261,7 @@ public class Main implements ActionListener {
 		isJoinRing();
 
 		Log.print("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress) + "\n");
+				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 	}
 	
 	private void joinBtnCall() {
@@ -315,16 +316,15 @@ public class Main implements ActionListener {
 	}
 	
 	private void sentInfoBtnCall() {
-		
+		Props.outputSentPropKV(DirName);
 	}
 	
 	private void cloudInfoBtnCall() {
-		String propFileName = DirName + Helper.NAME_LIST;
-		Props.outputPropKV(DirName, propFileName);
+		Props.outputCloudPropKV(DirName);
 	}
 	
 	private void nameInfoBtnCall() {
-		
+		Props.outputNamePropKV(DirName);
 	}
 	
 	private void uploadBtnCall() {

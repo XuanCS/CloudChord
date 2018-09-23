@@ -31,13 +31,14 @@ public class Timer extends Thread {
 	public void run() {
 		while (alive) {
 			if (curTime == 30) {
-				Helper.totalFileSize = 512;
+//				Helper.totalFileSize = 512;
 				if (Helper.totalFileSize >= Helper.lbLimit) {
 					InetSocketAddress successor = localNode.getSuccessor();
 
 					// get target file name
 					String propFileName = DirName + Helper.CLOUD_LIST;
 					String randFileName = Props.getRandPropFile(propFileName);
+					randFileName = randFileName.split("_")[0];
 					System.out.println("randFile: " + randFileName);
 
 					// send file to the successor

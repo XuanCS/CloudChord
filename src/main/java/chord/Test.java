@@ -1,20 +1,5 @@
 package chord;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Enumeration;
-
-import utils.Helper;
-
 /**
 	public static void main(String[] args) throws SocketException, UnknownHostException {
 		// TODO Auto-generated method stub
@@ -78,9 +63,15 @@ import utils.Helper;
 	}
 
 	*/
+import java.awt.Button;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class Test extends Frame implements ActionListener {
 	Button ab, rb; // ab for accept button and rb for reject button
@@ -119,7 +110,25 @@ public class Test extends Frame implements ActionListener {
 	}
 
 	public static void main(String args[]) {
-		new Test(); // just call the constructor because all the code
-							// exists in constructor
+//		new Test(); // just call the constructor because all the code
+		
+		
+		
+		JFrame sampleFrame = new JFrame();
+		// Code defining frame size, location and funcionality
+		 
+		JTextArea textArea = new JTextArea();
+		// Code defining text area parameters and functionality.
+		 
+//		sampleFrame.add(textArea);
+//		sampleFrame.setVisible(true);
+		
+		// Code defining text area parameters and functionality.
+		JScrollPane taScroll = new JScrollPane(textArea); // Adds the scrolls when there are too much text.
+//		taScroll.setSize(); 
+		
+		sampleFrame.add(taScroll); // You should add the scroll pane now, not the text area.
+		sampleFrame.setVisible(true);
+		sampleFrame.setSize(300, 200);
 	}
 }

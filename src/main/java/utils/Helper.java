@@ -47,9 +47,6 @@ public class Helper {
 	public static final long lbLimit = 512;
 	public static long totalFileSize = 0;
 
-	/**
-	 * Constructor
-	 */
 	public Helper() {
 		// initialize power of two table
 		powerOfTwo = new HashMap<Integer, Long>();

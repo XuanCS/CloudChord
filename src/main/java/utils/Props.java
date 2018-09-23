@@ -21,9 +21,7 @@ public class Props {
 		OutputStream output = null;
 		try {
 			output = new FileOutputStream(propFileName);
-			// set the properties value
 			prop.setProperty(key, value);
-			// save properties to project root folder
 			prop.store(output, null);
 
 		} catch (IOException io) {
@@ -43,47 +41,34 @@ public class Props {
 	}
 
 	public static String readProp(String key, String propFileName) {
-		Properties prop = new Properties();
-		InputStream input = null;
-		String res = null;
+		Properties props = loadProp(propFileName);
 
+		InputStream input;
 		try {
 			input = new FileInputStream(propFileName);
-
 			// load a properties file
-			prop.load(input);
-
-			// get the property value and print it out
-			res = prop.getProperty(key);
-			System.out.println(res);
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			props.load(input);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
+		// get the property value and print it out
+		String res = props.getProperty(key);
+		System.out.println(res);
 		return res;
 	}
 
 	public static void updateProp(String key, String value, String propFileName) {
-		FileInputStream in;
+		Properties props = loadProp(propFileName);
+		FileOutputStream out;
 		try {
-			in = new FileInputStream(propFileName);
-
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			FileOutputStream out = new FileOutputStream(propFileName);
+			out = new FileOutputStream(propFileName);
 			props.setProperty(key, value);
 			props.store(out, null);
 			out.close();
+			System.out.println("successfully update to " + propFileName);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -91,55 +76,24 @@ public class Props {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("successfully update to " + propFileName);
 	}
 
 	public static String seekProp(String target, String propFileName) {
-		FileInputStream in;
-		try {
-			in = new FileInputStream(propFileName);
+		Properties props = loadProp(propFileName);
+		// Iterating properties using For-Each
+		Set<String> keys = props.stringPropertyNames();
+		return findSameKey(keys, target, props);
 
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			// Iterating properties using For-Each
-			Set<String> keys = props.stringPropertyNames();
-			return findSameKey(keys, target, props);
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public static String getRandPropFile(String propFileName) {
-		FileInputStream in;
-		try {
-			in = new FileInputStream(propFileName);
-
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			// Iterating properties using For-Each
-			Set<String> keys = props.stringPropertyNames();
-			for (String str : keys) {
-				if (str.length() > 0) {
-					return str;
-				}
+		Properties props = loadProp(propFileName);
+		// Iterating properties using For-Each
+		Set<String> keys = props.stringPropertyNames();
+		for (String str : keys) {
+			if (str.length() > 0) {
+				return str;
 			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -156,27 +110,13 @@ public class Props {
 
 	public static List<String> seekPrefixKey(String target, String propFileName) {
 		List<String> arrList = new ArrayList<>();
-		FileInputStream in;
-		try {
-			in = new FileInputStream(propFileName);
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			// Iterating properties using For-Each
-			Set<String> keys = props.stringPropertyNames();
-			for (String key : keys) {
-				if (key.startsWith((target))) {
-					arrList.add(key);
-				}
+		Properties props = loadProp(propFileName);
+		// Iterating properties using For-Each
+		Set<String> keys = props.stringPropertyNames();
+		for (String key : keys) {
+			if (key.startsWith((target))) {
+				arrList.add(key);
 			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		if (arrList.isEmpty()) {
 			System.out.println("does not send out the target file");
@@ -185,59 +125,31 @@ public class Props {
 	}
 
 	public static String findPrefixKey(String target, String propFileName) {
-		FileInputStream in;
-		try {
-			in = new FileInputStream(propFileName);
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			// Iterating properties using For-Each
-			Set<String> keys = props.stringPropertyNames();
-			for (String key : keys) {
-				if (key.startsWith((target))) {
-					System.out.println("key is: " + key);
-					String sock = key.split("_")[1];
-					System.out.println("sock is: " + sock);
-					return key;
-				}
+		Properties props = loadProp(propFileName);
+		// Iterating properties using For-Each
+		Set<String> keys = props.stringPropertyNames();
+		for (String key : keys) {
+			if (key.startsWith((target))) {
+				System.out.println("key is: " + key);
+				String sock = key.split("_")[1];
+				System.out.println("sock is: " + sock);
+				return key;
 			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return null;
 	}
 
 	public static String findPrefixValue(String target, String propFileName) {
-		FileInputStream in;
-		try {
-			in = new FileInputStream(propFileName);
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
-
-			// Iterating properties using For-Each
-			Set<String> keys = props.stringPropertyNames();
-			for (String key : keys) {
-				if (key.startsWith((target))) {
-					System.out.println("key is: " + key);
-					String sock = key.split("_")[1];
-					System.out.println("sock is: " + sock);
-					return props.getProperty(key);
-				}
+		Properties props = loadProp(propFileName);
+		// Iterating properties using For-Each
+		Set<String> keys = props.stringPropertyNames();
+		for (String key : keys) {
+			if (key.startsWith((target))) {
+				System.out.println("key is: " + key);
+				String sock = key.split("_")[1];
+				System.out.println("sock is: " + sock);
+				return props.getProperty(key);
 			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return null;
 	}
@@ -264,12 +176,39 @@ public class Props {
 		}
 	}
 
-	public static void outputPropKV(String dirName, String propFileName) {
+	public static void outputSentPropKV(String dirName) {
+		String propFileName = dirName + Helper.SENT_FILE_LIST;
 		Properties props = loadProp(propFileName);
 		Set<String> keys = props.stringPropertyNames();
+		Log.print();
 		for (String key : keys) {
 			String value = props.getProperty(key);
-			String tmpOutput = key + " : " + value;
+			String tmpOutput = key + "\t" + value;
+			Log.print(tmpOutput);
+		}
+	}
+	
+	public static void outputCloudPropKV(String dirName) {
+		String propFileName = dirName + Helper.CLOUD_LIST;
+		Properties props = loadProp(propFileName);
+		Set<String> keys = props.stringPropertyNames();
+		Log.print();
+		for (String key : keys) {
+			String value = props.getProperty(key);
+			String prefixFN = key.split("_")[0];
+			String tmpOutput = prefixFN + "\t" + value;
+			Log.print(tmpOutput);
+		}
+	}
+	
+	public static void outputNamePropKV(String dirName) {
+		String propFileName = dirName + Helper.NAME_LIST;
+		Properties props = loadProp(propFileName);
+		Set<String> keys = props.stringPropertyNames();
+		Log.print();
+		for (String key : keys) {
+			String value = props.getProperty(key);
+			String tmpOutput = value + "\t" + key;
 			Log.print(tmpOutput);
 		}
 	}
