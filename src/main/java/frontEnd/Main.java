@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -27,43 +28,43 @@ import utils.SplitFile;
 
 public class Main implements ActionListener {
 
-	public static final int FRAME_WIDTH = 850;
-	public static final int FRAME_HEIGHT = 600;
+	private static final int FRAME_WIDTH = 850;
+	private static final int FRAME_HEIGHT = 650;
 
-	public static final int FIELD_WIDTH = 250;
-	public static final int FIELD_HEIGHT = 35;
+	private static final int FIELD_WIDTH = 250;
+	private static final int FIELD_HEIGHT = 35;
 
-	public static final int LABEL_WIDTH = 150;
-	public static final int LABEL_LONG_WIDTH = 350;
-	public static final int LABEL_HEIGHT = 30;
+	private static final int LABEL_WIDTH = 150;
+	private static final int LABEL_LONG_WIDTH = 350;
+	private static final int LABEL_HEIGHT = 30;
 
-	public static final int button_WIDTH = 75;
-	public static final int button_HEIGHT = 35;
-	public static final int button_LG_HEIGHT = 50;
+	private static final int button_WIDTH = 75;
+	private static final int button_HEIGHT = 35;
+	private static final int button_LG_HEIGHT = 50;
 
-	public static final int TEXTAREA_WIDTH = 600;
-	public static final int TEXTAREA_HEIGHT = 150;
+	private static final int TEXTAREA_WIDTH = 600;
+	private static final int TEXTAREA_HEIGHT = 250;
 
-	public static final int firstX_loc = 25;
-	public static final int secondX_loc = 300;
-	public static final int thirdX_loc = 450;
-	public static final int fourthX_loc = 550;
-	public static final int fifthX_loc = 650;
-	public static final int lastX_loc = 725;
+	private static final int firstX_loc = 25;
+	private static final int secondX_loc = 300;
+	private static final int thirdX_loc = 450;
+	private static final int fourthX_loc = 550;
+	private static final int fifthX_loc = 650;
+	private static final int lastX_loc = 725;
 
-	public static final int aboveFirstLineY_loc = 10;
-	public static final int firstLineY_loc = 35;
-	public static final int aboveSecondLineY_loc = 80;
-	public static final int secondLineY_loc = 105;
-	public static final int belowSecondLineY_loc = 140;
-	public static final int thirdLineY_loc = 175;
-	public static final int belowThirdLineY_loc = 210;
-	public static final int fourthLineY_loc = 245;
-	public static final int fifthLineY_loc = 315;
-	public static final int lastLineY_loc = 400;
+	private static final int aboveFirstLineY_loc = 10;
+	private static final int firstLineY_loc = 35;
+	private static final int aboveSecondLineY_loc = 80;
+	private static final int secondLineY_loc = 105;
+	private static final int belowSecondLineY_loc = 140;
+	private static final int thirdLineY_loc = 175;
+	private static final int belowThirdLineY_loc = 210;
+	private static final int fourthLineY_loc = 245;
+	private static final int fifthLineY_loc = 315;
+	private static final int lastLineY_loc = 400;
 
 	private JFrame frame;
-	private JTextArea output;
+	public static JTextArea output;
 
 	private JTextField starter;
 	private JTextField follower;
@@ -82,20 +83,20 @@ public class Main implements ActionListener {
 	private String localPortNum;
 	private String DirName;
 
-
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 
-		output = new JTextArea("Empty");
+		output = new JTextArea("");
 		output.setEditable(false);
-		output.setBounds(firstX_loc, lastLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
-
+		output.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
+		
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
 		m_helper = new Helper();
+		
 
 		try {
 			local_ip = InetAddress.getLocalHost().getHostAddress();
@@ -179,6 +180,7 @@ public class Main implements ActionListener {
 
 		JButton checkBtn = new JButton("Check");
 		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		checkBtn.addActionListener(this);
 		panel.add(checkBtn);
 
 		JButton clearBtn = new JButton("Clear");
@@ -201,6 +203,7 @@ public class Main implements ActionListener {
 		panel.add(nameInfoBtn);
 
 		panel.add(output);
+
 		frame.add(panel);
 		frame.setVisible(true);
 	}
@@ -215,11 +218,23 @@ public class Main implements ActionListener {
 		case "Join":
 			joinBtnCall();
 			break;
+		case "About":
+			aboutBtnCall();
+			break;
 		case "Quit":
 			quitBtnCall();
 			break;
-		case "About":
-			aboutBtnCall();
+		case "Check":
+			checkBtnCall();
+			break;
+		case "SentInfo":
+			sentInfoBtnCall();
+			break;
+		case "CloudInfo":
+			cloudInfoBtnCall();
+			break;
+		case "NameInfo":
+			nameInfoBtnCall();
 			break;
 		case "Upload":
 			uploadBtnCall();
@@ -244,8 +259,8 @@ public class Main implements ActionListener {
 		m_contact = m_node.getAddress();
 		isJoinRing();
 
-		output.setText("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
-				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+		Log.print("Initiate the Chord ring\nLocal IP: " + local_ip + ", Local Port Num: " + localPortNum
+				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress) + "\n");
 	}
 	
 	private void joinBtnCall() {
@@ -271,6 +286,13 @@ public class Main implements ActionListener {
 				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
 	}
 	
+	private void aboutBtnCall() {
+		String dir_name = starter.getText();
+		if (dir_name.length() == 0) {
+			return;
+		}
+	}
+	
 	private void quitBtnCall() {
 		InetSocketAddress successor = m_node.getSuccessor();
 		boolean isLastNode = Helper.checkLastNode(m_node, localAddress);
@@ -288,11 +310,21 @@ public class Main implements ActionListener {
 		System.exit(0);
 	}
 	
-	private void aboutBtnCall() {
-		String dir_name = starter.getText();
-		if (dir_name.length() == 0) {
-			return;
-		}
+	private void checkBtnCall() {
+		Log.print("hello");;
+	}
+	
+	private void sentInfoBtnCall() {
+		
+	}
+	
+	private void cloudInfoBtnCall() {
+		String propFileName = DirName + Helper.NAME_LIST;
+		Props.outputPropKV(DirName, propFileName);
+	}
+	
+	private void nameInfoBtnCall() {
+		
 	}
 	
 	private void uploadBtnCall() {

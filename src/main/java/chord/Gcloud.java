@@ -156,7 +156,7 @@ public class Gcloud {
 				String propFileName = dirName + Helper.CLOUD_LIST;
 				String propFileTitle = Helper.genCldProSurfix(fileSock, title);
 				Props.updateProp(propFileTitle, res, propFileName);
-				Main.totalFileSize += fileSize;
+				Helper.totalFileSize += fileSize;
 			}		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

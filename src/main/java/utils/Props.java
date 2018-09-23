@@ -7,9 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import frontEnd.Log;
 
 public class Props {
 	public static void writeProp(String key, String value, String propFileName) {
@@ -112,7 +116,7 @@ public class Props {
 		}
 		return null;
 	}
-	
+
 	public static String getRandPropFile(String propFileName) {
 		FileInputStream in;
 		try {
@@ -140,7 +144,7 @@ public class Props {
 		return "";
 	}
 
-	private static String findSameKey(Set<String> keys,String target,  Properties props) {
+	private static String findSameKey(Set<String> keys, String target, Properties props) {
 		for (String key : keys) {
 			if (key.equals(target)) {
 				return props.getProperty(target);
@@ -151,7 +155,7 @@ public class Props {
 	}
 
 	public static List<String> seekPrefixKey(String target, String propFileName) {
-		List<String> arrList = new ArrayList<>();	
+		List<String> arrList = new ArrayList<>();
 		FileInputStream in;
 		try {
 			in = new FileInputStream(propFileName);
@@ -179,7 +183,7 @@ public class Props {
 		}
 		return arrList;
 	}
-	
+
 	public static String findPrefixKey(String target, String propFileName) {
 		FileInputStream in;
 		try {
@@ -208,7 +212,7 @@ public class Props {
 		}
 		return null;
 	}
-	
+
 	public static String findPrefixValue(String target, String propFileName) {
 		FileInputStream in;
 		try {
@@ -237,20 +241,19 @@ public class Props {
 		}
 		return null;
 	}
-	
+
 	public static void rmPropKey(String key, String propFileName) {
 		FileInputStream in;
 		try {
 			in = new FileInputStream(propFileName);
 			FileOutputStream out = new FileOutputStream(propFileName);
-			
+
 			Properties props = new Properties();
 			props.load(in);
 			in.close();
 			props.remove(key);
 			props.store(out, null);
 			out.close();
-
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -259,5 +262,33 @@ public class Props {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public static void outputPropKV(String dirName, String propFileName) {
+		Properties props = loadProp(propFileName);
+		Set<String> keys = props.stringPropertyNames();
+		for (String key : keys) {
+			String value = props.getProperty(key);
+			String tmpOutput = key + " : " + value;
+			Log.print(tmpOutput);
+		}
+	}
+
+	private static Properties loadProp(String propFileName) {
+		FileInputStream in;
+		Properties props = null;
+		try {
+			in = new FileInputStream(propFileName);
+			props = new Properties();
+			props.load(in);
+			in.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return props;
 	}
 }
