@@ -57,25 +57,13 @@ public class Helper {
 		}
 	}
 
-	/**
-	 * Compute a socket address' 32 bit identifier
-	 * 
-	 * @param addr:
-	 *            socket address
-	 * @return 32-bit identifier in long type
-	 */
+
 	public static long hashSocketAddress(InetSocketAddress addr) {
 		int i = addr.hashCode();
 		return hashHashCode(i);
 	}
 
-	/**
-	 * Compute a string's 32 bit identifier
-	 * 
-	 * @param s:
-	 *            string
-	 * @return 32-bit identifier in long type
-	 */
+
 	public static long hashString(String s) {
 		int i = s.hashCode();
 		return hashHashCode(i);

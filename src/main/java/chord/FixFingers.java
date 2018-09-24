@@ -29,7 +29,7 @@ public class FixFingers extends Thread{
 			InetSocketAddress ithfinger = local.find_successor(Helper.ithStart(local.getId(), i));
 			local.updateFingers(i, ithfinger);
 			try {
-				Thread.sleep(500);
+				Thread.sleep(60);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -1,6 +1,7 @@
 package chord;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Map;
 
 import utils.Helper;
 
@@ -242,28 +243,22 @@ public class Node {
 	 * @param value
 	 */
 	public synchronized void updateFingers(int i, InetSocketAddress value) {
-
 		// valid index in [1, 32], just update the ith finger
 		if (i > 0 && i <= 32) {
 			updateIthFinger(i, value);
 		}
-
 		// caller wants to delete
 		else if (i == -1) {
 			deleteSuccessor();
 		}
-
 		// caller wants to delete a finger in table
 		else if (i == -2) {
 			deleteCertainFinger(value);
-
 		}
-
 		// caller wants to fill successor
 		else if (i == -3) {
 			fillSuccessor();
 		}
-
 	}
 
 	/**
@@ -416,64 +411,11 @@ public class Node {
 		return null;
 	}
 
-	/**
-	 * Print functions
-	 */
-
-	public void printNeighbors () {
-		System.out.println("\nYou are listening on port "+localAddress.getPort()+"."
-				+ "\nYour position is "+Helper.hexIdAndPosition(localAddress)+".");
-		InetSocketAddress successor = finger.get(1);
-		
-		// if it cannot find both predecessor and successor
-		if ((predecessor == null || predecessor.equals(localAddress)) && (successor == null || successor.equals(localAddress))) {
-			System.out.println("Your predecessor is yourself.");
-			System.out.println("Your successor is yourself.");
-
-		}
-		
-		// else, it can find either predecessor or successor
-		else {
-			if (predecessor != null) {
-				System.out.println("Your predecessor is node "+predecessor.getAddress().toString()+", "
-						+ "port "+predecessor.getPort()+ ", position "+Helper.hexIdAndPosition(predecessor)+".");
-			}
-			else {
-				System.out.println("Your predecessor is updating.");
-			}
-
-			if (successor != null) {
-				System.out.println("Your successor is node "+successor.getAddress().toString()+", "
-						+ "port "+successor.getPort()+ ", position "+Helper.hexIdAndPosition(successor)+".");
-			}
-			else {
-				System.out.println("Your successor is updating.");
-			}
-		}
+	
+	public  Map<Integer, InetSocketAddress> getFiger() {
+		return finger;
 	}
 
-	public void printDataStructure () {
-		System.out.println("\n==============================================================");
-		System.out.println("\nLOCAL:\t\t\t\t"+localAddress.toString()+"\t"+Helper.hexIdAndPosition(localAddress));
-		if (predecessor != null)
-			System.out.println("\nPREDECESSOR:\t\t\t"+predecessor.toString()+"\t"+Helper.hexIdAndPosition(predecessor));
-		else 
-			System.out.println("\nPREDECESSOR:\t\t\tNULL");
-		System.out.println("\nFINGER TABLE:\n");
-		for (int i = 1; i <= 32; i++) {
-			long ithstart = Helper.ithStart(Helper.hashSocketAddress(localAddress),i);
-			InetSocketAddress f = finger.get(i);
-			StringBuilder sb = new StringBuilder();
-			sb.append(i+"\t"+ Helper.longTo8DigitHex(ithstart)+"\t\t");
-			if (f!= null)
-				sb.append(f.toString()+"\t"+Helper.hexIdAndPosition(f));
-
-			else 
-				sb.append("NULL");
-			System.out.println(sb.toString());
-		}
-		System.out.println("\n==============================================================\n");
-	}
 
 	/**
 	 * Stop this node's all threads.

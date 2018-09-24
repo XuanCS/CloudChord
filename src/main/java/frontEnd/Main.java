@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -41,7 +43,7 @@ public class Main implements ActionListener {
 	private static final int button_HEIGHT = 35;
 	private static final int button_LG_HEIGHT = 50;
 
-	private static final int TEXTAREA_WIDTH = 600;
+	private static final int TEXTAREA_WIDTH = 650;
 	private static final int TEXTAREA_HEIGHT = 250;
 
 	private static final int firstX_loc = 25;
@@ -49,7 +51,7 @@ public class Main implements ActionListener {
 	private static final int thirdX_loc = 450;
 	private static final int fourthX_loc = 550;
 	private static final int fifthX_loc = 650;
-	private static final int lastX_loc = 725;
+	private static final int lastX_loc = 750;
 
 	private static final int aboveFirstLineY_loc = 10;
 	private static final int firstLineY_loc = 35;
@@ -85,16 +87,15 @@ public class Main implements ActionListener {
 
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
-		output = new JTextArea("");	
+		output = new JTextArea("");
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
 		illegalClick = new JLabel();
-		m_helper = new Helper();		
+		m_helper = new Helper();
 
 		try {
 			local_ip = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -103,13 +104,13 @@ public class Main implements ActionListener {
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
-		
+
 		output.setEditable(false);
 		output.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
-		
-		JScrollPane taScroll = new JScrollPane(output); // Adds the scrolls when there are too much text.
+
+		JScrollPane taScroll = new JScrollPane(output); 
 		taScroll.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
-		
+
 		// set label
 		JPanel panel = new JPanel();
 		panel.setLayout(null); // add components by coordinates
@@ -133,7 +134,7 @@ public class Main implements ActionListener {
 		illegalDownload.setBounds(thirdX_loc, belowThirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalDownload.setForeground(Color.RED);
 		panel.add(illegalDownload);
-		
+
 		illegalClick.setBounds(firstX_loc, thirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalClick.setForeground(Color.RED);
 		panel.add(illegalClick);
@@ -170,6 +171,16 @@ public class Main implements ActionListener {
 		aboutBtn.addActionListener(this);
 		panel.add(aboutBtn);
 
+		JButton ftBtn = new JButton("FigureTbl");
+		ftBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		ftBtn.addActionListener(this);
+		panel.add(ftBtn);
+
+		JButton quitBtn = new JButton("Quit");
+		quitBtn.setBounds(fifthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		quitBtn.addActionListener(this);
+		panel.add(quitBtn);
+
 		JButton uploadBtn = new JButton("Upload");
 		uploadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
 		uploadBtn.addActionListener(this);
@@ -179,22 +190,17 @@ public class Main implements ActionListener {
 		downloadBtn.setBounds(thirdX_loc, fourthLineY_loc, button_WIDTH, button_HEIGHT);
 		downloadBtn.addActionListener(this);
 		panel.add(downloadBtn);
-		
-		JButton quitBtn = new JButton("Quit");
-		quitBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		quitBtn.addActionListener(this);
-		panel.add(quitBtn);
 
 		JButton checkBtn = new JButton("Check");
 		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		checkBtn.addActionListener(this);
-		panel.add(checkBtn);
+		// panel.add(checkBtn);
 
 		JButton clearBtn = new JButton("Clear");
 		clearBtn.setBounds(lastX_loc, fifthLineY_loc, button_WIDTH, button_LG_HEIGHT);
 		clearBtn.addActionListener(this);
 		panel.add(clearBtn);
-	
+
 		JButton sentInfoBtn = new JButton("SentInfo");
 		sentInfoBtn.setBounds(thirdX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
 		sentInfoBtn.addActionListener(this);
@@ -210,11 +216,15 @@ public class Main implements ActionListener {
 		nameInfoBtn.addActionListener(this);
 		panel.add(nameInfoBtn);
 
+		Random rand = new Random();
+		int margin= rand.nextInt(25);
+
 		panel.add(taScroll);
 		frame.add(panel);
 		frame.setVisible(true);
+		frame.setLocation(50 + margin, 50 + margin);
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String str = e.getActionCommand();
@@ -227,6 +237,9 @@ public class Main implements ActionListener {
 			break;
 		case "About":
 			aboutBtnCall();
+			break;
+		case "FigureTbl":
+			ftBtnCall();
 			break;
 		case "Quit":
 			quitBtnCall();
@@ -256,10 +269,10 @@ public class Main implements ActionListener {
 			break;
 		}
 	}
-	
+
 	private void startBtnCall() {
 		// illegal check
-		
+
 		localPortNum = starter.getText();
 		startNodeAndFolder(localPortNum);
 		m_contact = m_node.getAddress();
@@ -267,7 +280,7 @@ public class Main implements ActionListener {
 		Log.print("Initiate the Chord ring");
 		printCurNodeInfo();
 	}
-	
+
 	private void joinBtnCall() {
 		String introNode = follower.getText();
 
@@ -290,7 +303,7 @@ public class Main implements ActionListener {
 		Log.print("Joining the Chord ring");
 		printCurNodeInfo();
 	}
-	
+
 	private void aboutBtnCall() {
 		if (!isClickOK()) {
 			return;
@@ -298,7 +311,14 @@ public class Main implements ActionListener {
 		Log.print();
 		printCurNodeInfo();
 	}
-	
+
+	private void ftBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
+		printFTInfo();
+	}
+
 	private void quitBtnCall() {
 		if (!isClickOK()) {
 			return;
@@ -318,32 +338,32 @@ public class Main implements ActionListener {
 		System.out.println("Leaving the ring...");
 		System.exit(0);
 	}
-	
+
 	private void checkBtnCall() {
 
 	}
-	
+
 	private void sentInfoBtnCall() {
 		if (!isClickOK()) {
 			return;
 		}
 		Props.outputSentPropKV(DirName);
 	}
-	
+
 	private void cloudInfoBtnCall() {
 		if (!isClickOK()) {
 			return;
 		}
 		Props.outputCloudPropKV(DirName);
 	}
-	
+
 	private void nameInfoBtnCall() {
 		if (!isClickOK()) {
 			return;
 		}
 		Props.outputNamePropKV(DirName);
 	}
-	
+
 	private void uploadBtnCall() {
 		if (!isClickOK()) {
 			return;
@@ -385,17 +405,14 @@ public class Main implements ActionListener {
 					Gcloud gc = new Gcloud(DirName);
 					gc.uploadTextFile(hashFileName, localSock);
 
-					output.setText(
-							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-									+ "\nsuccesfully upload file: " + splitFile);
+					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+							+ "\nsuccesfully upload file: " + splitFile);
 				} else {
 					String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
 					System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
 					System.out.println("feedback: " + tmp_response);
-					output.setText(
-							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-									+ "\nsuccesfully send file to successor cloud account, and upload file: "
-									+ splitFile);
+					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+							+ "\nsuccesfully send file to successor cloud account, and upload file: " + splitFile);
 				}
 
 				// keep track of all the uploaded files from current
@@ -410,7 +427,7 @@ public class Main implements ActionListener {
 			FileUtils.deletelocalFile(DirName, hashFileName);
 		}
 	}
-	
+
 	private void downloadBtnCall() {
 		if (!isClickOK()) {
 			return;
@@ -432,16 +449,14 @@ public class Main implements ActionListener {
 				if (localAddress.equals(result)) {
 					Gcloud gc = new Gcloud(DirName);
 					gc.downLoadFile(hashFileName);
-					output.setText(
-							"file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-									+ "\nsuccesfully download file: " + splitFile);
+					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+							+ "\nsuccesfully download file: " + splitFile);
 
 				} else {
 					String res = Helper.sendQueryFile(result, DirName, hashFileName);
 					System.out.println("feedback: " + res);
-					output.setText("file " + splitFile + ", Position is "
-							+ Helper.hexFileNameAndPosition(splitFile) + "\nsuccesfully download file: "
-							+ splitFile + " from target cloud account");
+					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
+							+ "\nsuccesfully download file: " + splitFile + " from target cloud account");
 				}
 				FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);
 			}
@@ -459,7 +474,7 @@ public class Main implements ActionListener {
 		}
 		FileUtils.deletelocalFile(downloadFolder, encFileName);
 	}
-	
+
 	private void clearBtnCall() {
 		uploadField.setText("");
 		downloadField.setText("");
@@ -467,7 +482,7 @@ public class Main implements ActionListener {
 		illegalDownload.setText("");
 		illegalClick.setText("");
 	}
-	
+
 	private void startNodeAndFolder(String localPortNum) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
@@ -492,15 +507,58 @@ public class Main implements ActionListener {
 
 		System.out.println("Joining the Chord ring.");
 		System.out.println("Local IP: " + local_ip);
-		m_node.printNeighbors();
 		return true;
 	}
-	
+
 	private void printCurNodeInfo() {
-		Log.print("Local IP: " + local_ip + ", \nLocal Port Num: " + localPortNum
-				+ "\nYour positions is " + Helper.hexIdAndPosition(localAddress));
+		Log.print("Local IP: " + local_ip + ", \nLocal Port Num: " + localPortNum + "\nYour positions is "
+				+ Helper.hexIdAndPosition(localAddress));
+
+		InetSocketAddress successor = m_node.getFiger().get(1);
+		InetSocketAddress predecessor = m_node.getPredecessor();
+
+		if ((predecessor == null || predecessor.equals(localAddress))
+				&& (successor == null || successor.equals(localAddress))) {
+			Log.print("Your predecessor is yourself.");
+			Log.print("Your successor is yourself.");
+		} else {
+			if (predecessor != null) {
+				Log.print("Your predecessor is node " + predecessor.getAddress().toString() + ", " + "port "
+						+ predecessor.getPort() + ", position " + Helper.hexIdAndPosition(predecessor) + ".");
+			} else {
+				Log.print("Your predecessor is updating.");
+			}
+
+			if (successor != null) {
+				Log.print("Your successor is node " + successor.getAddress().toString() + ", " + "port "
+						+ successor.getPort() + ", position " + Helper.hexIdAndPosition(successor) + ".");
+			} else {
+				Log.print("Your successor is updating.");
+			}
+		}
 	}
-	
+
+	private void printFTInfo() {
+		InetSocketAddress predecessor = m_node.getPredecessor();
+		Map<Integer, InetSocketAddress> finger = m_node.getFiger();
+
+		Log.print();
+		Log.print("FINGER TABLE:");
+		for (int i = 1; i <= 32; i++) {
+			long ithstart = Helper.ithStart(Helper.hashSocketAddress(localAddress), i);
+			InetSocketAddress f = finger.get(i);
+			StringBuilder sb = new StringBuilder();
+			sb.append(i + "\t" + Helper.longTo8DigitHex(ithstart) + "\t\t");
+			if (f != null) {
+				sb.append(f.toString() + "\t" + Helper.hexIdAndPosition(f));
+			}
+			else {
+				sb.append("NULL");
+			}
+			Log.print(sb.toString());
+		}
+	}
+
 	private boolean isClickOK() {
 		if (starter.getText().length() == 0 && follower.getText().length() == 0) {
 			illegalClick.setText("Need to specify Initiate or Join PortNum above");
