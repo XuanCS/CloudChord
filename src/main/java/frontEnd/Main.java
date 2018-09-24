@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,6 +43,7 @@ public class Main implements ActionListener {
 
 	private static final int button_WIDTH = 75;
 	private static final int button_HEIGHT = 35;
+	private static final int button_SM_HEIGHT = 20;
 	private static final int button_LG_HEIGHT = 50;
 
 	private static final int TEXTAREA_WIDTH = 650;
@@ -59,7 +62,8 @@ public class Main implements ActionListener {
 	private static final int secondLineY_loc = 105;
 	private static final int belowSecondLineY_loc = 140;
 	private static final int thirdLineY_loc = 175;
-	private static final int belowThirdLineY_loc = 210;
+	private static final int belowThirdLineY_loc = 185;
+	private static final int aboveFourthLineY_loc = 210;
 	private static final int fourthLineY_loc = 245;
 	private static final int fifthLineY_loc = 315;
 	private static final int lastLineY_loc = 400;
@@ -69,9 +73,9 @@ public class Main implements ActionListener {
 
 	private JTextField starter;
 	private JTextField follower;
-	private JTextField uploadField;
 	private JTextField downloadField;
-
+	
+	private JLabel uploadLabel;
 	private JLabel illegalUpload;
 	private JLabel illegalDownload;
 	private JLabel illegalClick;
@@ -88,6 +92,7 @@ public class Main implements ActionListener {
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
 		output = new JTextArea("");
+		uploadLabel = new JLabel();
 		illegalUpload = new JLabel();
 		illegalDownload = new JLabel();
 		illegalClick = new JLabel();
@@ -131,7 +136,7 @@ public class Main implements ActionListener {
 		illegalUpload.setForeground(Color.RED);
 		panel.add(illegalUpload);
 
-		illegalDownload.setBounds(thirdX_loc, belowThirdLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
+		illegalDownload.setBounds(thirdX_loc, aboveFourthLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		illegalDownload.setForeground(Color.RED);
 		panel.add(illegalDownload);
 
@@ -147,10 +152,9 @@ public class Main implements ActionListener {
 		follower = new JTextField();
 		follower.setBounds(firstX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 		panel.add(follower);
-
-		uploadField = new JTextField();
-		uploadField.setBounds(fourthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
-		panel.add(uploadField);
+		
+		uploadLabel.setBounds(fifthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		panel.add(uploadLabel);
 
 		downloadField = new JTextField();
 		downloadField.setBounds(fourthX_loc, fourthLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
@@ -185,16 +189,45 @@ public class Main implements ActionListener {
 		uploadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
 		uploadBtn.addActionListener(this);
 		panel.add(uploadBtn);
+		
+		JButton selFileBtn = new JButton("SelectFile");
+		selFileBtn.setBounds(fourthX_loc, belowThirdLineY_loc, button_WIDTH, button_SM_HEIGHT);
+		selFileBtn.addActionListener(this);
+		panel.add(selFileBtn);
 
 		JButton downloadBtn = new JButton("Download");
 		downloadBtn.setBounds(thirdX_loc, fourthLineY_loc, button_WIDTH, button_HEIGHT);
 		downloadBtn.addActionListener(this);
 		panel.add(downloadBtn);
+		
+        // Combobox
+//        JLabel labelCombo = new JLabel("Bank Code");
+//		labelCombo.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 
-		JButton checkBtn = new JButton("Check");
-		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-		checkBtn.addActionListener(this);
+        // Options in the combobox
+        String[] options = { "Option1", "Option2", "Option3", "Option4", "Option15" };
+        JComboBox comboBox = new JComboBox(options);
+		comboBox.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+
+        comboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Do something when you select a value
+
+            }
+        });
+//        panel.add(labelCombo);
+        panel.add(comboBox);
+
+//		JButton checkBtn = new JButton("Check");
+//		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+//		checkBtn.addActionListener(this);
 		// panel.add(checkBtn);
+        
+//		FileChooser fileChooser = new FileChooser();
+//        Button button = new Button("Select File");
+//        int result = fileChooser.showOpenDialog(frame);
 
 		JButton clearBtn = new JButton("Clear");
 		clearBtn.setBounds(lastX_loc, fifthLineY_loc, button_WIDTH, button_LG_HEIGHT);
@@ -255,6 +288,9 @@ public class Main implements ActionListener {
 			break;
 		case "NameInfo":
 			nameInfoBtnCall();
+			break;
+		case "SelectFile":
+			selFileCall(DirName);
 			break;
 		case "Upload":
 			uploadBtnCall();
@@ -363,13 +399,18 @@ public class Main implements ActionListener {
 		}
 		Props.outputNamePropKV(DirName);
 	}
+	
 
 	private void uploadBtnCall() {
 		if (!isClickOK()) {
 			return;
 		}
 		// get file info, encryption and split file
-		String inputFileName = uploadField.getText();
+		String inputFileName = uploadLabel.getText();
+		if (inputFileName.length() == 0) {
+			return;
+		}
+		Log.print("Upload File path is: " + inputFileName);	
 		FileUtils.checkInputFile(inputFileName, localAddress);
 
 		// encrypt and then split and delete the encode file
@@ -476,7 +517,7 @@ public class Main implements ActionListener {
 	}
 
 	private void clearBtnCall() {
-		uploadField.setText("");
+//		uploadField.setText("");
 		downloadField.setText("");
 		illegalUpload.setText("");
 		illegalDownload.setText("");
@@ -556,6 +597,19 @@ public class Main implements ActionListener {
 				sb.append("NULL");
 			}
 			Log.print(sb.toString());
+		}
+	}
+	
+	private void selFileCall(String dirName) {
+		if (!isClickOK()) {
+			return;
+		}
+		JFileChooser jfc = new JFileChooser(Helper.home_path + "/" + DirName);
+		int returnValue = jfc.showOpenDialog(null);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			String fn = selectedFile.getName();
+			uploadLabel.setText(fn);
 		}
 	}
 

@@ -30,6 +30,7 @@ public class Helper {
 	public static final String chordPrefix = "Chord_";
 	public static final String cpPrefix = "cp_";
 
+	public static String home_path = "/Users/luxuan/Documents/workspace/CloudChord";
 	public static final String SENT_FILE_LIST = "/sent_file.props";
 	public static final String CLOUD_LIST = "/cloud.props";
 	public static final String NAME_LIST = "/name.props";
