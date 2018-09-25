@@ -35,6 +35,7 @@ public class Main implements ActionListener {
 	private static final int FRAME_HEIGHT = 650;
 
 	private static final int FIELD_WIDTH = 250;
+	private static final int FIELD_SM_WIDTH = 110;
 	private static final int FIELD_HEIGHT = 35;
 
 	private static final int LABEL_WIDTH = 150;
@@ -50,6 +51,7 @@ public class Main implements ActionListener {
 	private static final int TEXTAREA_HEIGHT = 250;
 
 	private static final int firstX_loc = 25;
+	private static final int right_firstX_loc = 140;
 	private static final int secondX_loc = 300;
 	private static final int thirdX_loc = 450;
 	private static final int fourthX_loc = 550;
@@ -73,9 +75,11 @@ public class Main implements ActionListener {
 
 	private JTextField starter;
 	private JTextField follower;
+	private String introNodeSock;
 	private JTextField downloadField;
-	
+
 	private JLabel uploadLabel;
+	private JLabel joinNodeLabel;
 	private JLabel illegalUpload;
 	private JLabel illegalDownload;
 	private JLabel illegalClick;
@@ -92,10 +96,6 @@ public class Main implements ActionListener {
 	public Main() {
 		frame = new JFrame("Cloud Chord App");
 		output = new JTextArea("");
-		uploadLabel = new JLabel();
-		illegalUpload = new JLabel();
-		illegalDownload = new JLabel();
-		illegalClick = new JLabel();
 		m_helper = new Helper();
 
 		try {
@@ -106,6 +106,12 @@ public class Main implements ActionListener {
 	}
 
 	public void mainFrame() {
+		uploadLabel = new JLabel();
+		illegalUpload = new JLabel();
+		illegalDownload = new JLabel();
+		illegalClick = new JLabel();
+		joinNodeLabel = new JLabel();
+		
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
@@ -113,7 +119,7 @@ public class Main implements ActionListener {
 		output.setEditable(false);
 		output.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
 
-		JScrollPane taScroll = new JScrollPane(output); 
+		JScrollPane taScroll = new JScrollPane(output);
 		taScroll.setBounds(firstX_loc, fifthLineY_loc, TEXTAREA_WIDTH, TEXTAREA_HEIGHT);
 
 		// set label
@@ -150,9 +156,9 @@ public class Main implements ActionListener {
 		panel.add(starter);
 
 		follower = new JTextField();
-		follower.setBounds(firstX_loc, secondLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
+		follower.setBounds(firstX_loc, secondLineY_loc, FIELD_SM_WIDTH, FIELD_HEIGHT);
 		panel.add(follower);
-		
+
 		uploadLabel.setBounds(fifthX_loc, thirdLineY_loc, FIELD_WIDTH, FIELD_HEIGHT);
 		panel.add(uploadLabel);
 
@@ -164,6 +170,29 @@ public class Main implements ActionListener {
 		startBtn.setBounds(secondX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		startBtn.addActionListener(this);
 		panel.add(startBtn);
+		
+		joinNodeLabel.setBounds(firstX_loc, belowSecondLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
+		panel.add(joinNodeLabel);
+		
+		JLabel nodeSelect = new JLabel("Plz Select to Join");
+		nodeSelect.setBounds(right_firstX_loc, aboveSecondLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
+		panel.add(nodeSelect);
+		
+		// Options in the combobox
+		String[] options = Props.getActiveNodesInfo();
+		JComboBox comboBox = new JComboBox(options);
+		comboBox.setBounds(right_firstX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
+		comboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Do something when you select a value
+				introNodeSock = comboBox.getSelectedItem().toString();
+				joinNodeLabel.setText("Selected Join Node: " + introNodeSock);
+			}
+		});
+		panel.add(comboBox);
+		
+
 
 		JButton joinBtn = new JButton("Join");
 		joinBtn.setBounds(secondX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
@@ -189,7 +218,7 @@ public class Main implements ActionListener {
 		uploadBtn.setBounds(thirdX_loc, thirdLineY_loc, button_WIDTH, button_HEIGHT);
 		uploadBtn.addActionListener(this);
 		panel.add(uploadBtn);
-		
+
 		JButton selFileBtn = new JButton("SelectFile");
 		selFileBtn.setBounds(fourthX_loc, belowThirdLineY_loc, button_WIDTH, button_SM_HEIGHT);
 		selFileBtn.addActionListener(this);
@@ -199,35 +228,6 @@ public class Main implements ActionListener {
 		downloadBtn.setBounds(thirdX_loc, fourthLineY_loc, button_WIDTH, button_HEIGHT);
 		downloadBtn.addActionListener(this);
 		panel.add(downloadBtn);
-		
-        // Combobox
-//        JLabel labelCombo = new JLabel("Bank Code");
-//		labelCombo.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-
-        // Options in the combobox
-        String[] options = { "Option1", "Option2", "Option3", "Option4", "Option15" };
-        JComboBox comboBox = new JComboBox(options);
-		comboBox.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-
-        comboBox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Do something when you select a value
-
-            }
-        });
-//        panel.add(labelCombo);
-        panel.add(comboBox);
-
-//		JButton checkBtn = new JButton("Check");
-//		checkBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
-//		checkBtn.addActionListener(this);
-		// panel.add(checkBtn);
-        
-//		FileChooser fileChooser = new FileChooser();
-//        Button button = new Button("Select File");
-//        int result = fileChooser.showOpenDialog(frame);
 
 		JButton clearBtn = new JButton("Clear");
 		clearBtn.setBounds(lastX_loc, fifthLineY_loc, button_WIDTH, button_LG_HEIGHT);
@@ -250,7 +250,7 @@ public class Main implements ActionListener {
 		panel.add(nameInfoBtn);
 
 		Random rand = new Random();
-		int margin= rand.nextInt(25);
+		int margin = rand.nextInt(25);
 
 		panel.add(taScroll);
 		frame.add(panel);
@@ -276,9 +276,6 @@ public class Main implements ActionListener {
 			break;
 		case "Quit":
 			quitBtnCall();
-			break;
-		case "Check":
-			checkBtnCall();
 			break;
 		case "SentInfo":
 			sentInfoBtnCall();
@@ -310,7 +307,7 @@ public class Main implements ActionListener {
 		// illegal check
 
 		localPortNum = starter.getText();
-		startNodeAndFolder(localPortNum);
+		startNodeAndFolder(localPortNum, true);
 		m_contact = m_node.getAddress();
 		isJoinRing();
 		Log.print("Initiate the Chord ring");
@@ -318,18 +315,23 @@ public class Main implements ActionListener {
 	}
 
 	private void joinBtnCall() {
-		String introNode = follower.getText();
-
-		// illegal check
-
-		localPortNum = introNode.split(" ")[0];
-		String targetIP = introNode.split(" ")[1];
-		String targetIPPort = introNode.split(" ")[2];
+		
+		localPortNum = follower.getText();
+		if (localPortNum == null || localPortNum.length() == 0) {
+			joinNodeLabel.setText("Please input port number");
+			return;
+		}
+		if (introNodeSock == null || introNodeSock.length() == 0) {
+			joinNodeLabel.setText("Please select the join node");
+			return;
+		}
+		String targetIP = introNodeSock.split(" ")[0];
+		String targetIPPort = introNodeSock.split(" ")[1];
 		System.out.println("port num: " + localPortNum);
 		System.out.println("join ip: " + targetIP);
 		System.out.println("join port num: " + targetIPPort);
 
-		startNodeAndFolder(localPortNum);
+		startNodeAndFolder(localPortNum, false);
 		m_contact = Helper.createSocketAddress(targetIP + ":" + targetIPPort);
 		if (m_contact == null) {
 			System.out.println("Cannot find address you are trying to contact. Now exit.");
@@ -367,16 +369,18 @@ public class Main implements ActionListener {
 		// iterate all files in cloud
 		String localSock = local_ip + " " + localPortNum;
 
-		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
+//		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
+		String sockInfo = local_ip + " "+localPortNum;
+		System.out.println("sock info: " + sockInfo);
+		Props.updateProp(sockInfo, Helper.INACTIVE, Helper.NODES_INFO);
+		if (isLastNode) {
+			Props.rmPropKey(sockInfo, Helper.NODES_INFO);
+		}
 
 		m_node.stopAllThreads();
 		output.setText("send out all files from user's cloud account, Leaving the ring...");
 		System.out.println("Leaving the ring...");
 		System.exit(0);
-	}
-
-	private void checkBtnCall() {
-
 	}
 
 	private void sentInfoBtnCall() {
@@ -399,7 +403,6 @@ public class Main implements ActionListener {
 		}
 		Props.outputNamePropKV(DirName);
 	}
-	
 
 	private void uploadBtnCall() {
 		if (!isClickOK()) {
@@ -410,7 +413,7 @@ public class Main implements ActionListener {
 		if (inputFileName.length() == 0) {
 			return;
 		}
-		Log.print("Upload File path is: " + inputFileName);	
+		Log.print("Upload File path is: " + inputFileName);
 		FileUtils.checkInputFile(inputFileName, localAddress);
 
 		// encrypt and then split and delete the encode file
@@ -517,24 +520,31 @@ public class Main implements ActionListener {
 	}
 
 	private void clearBtnCall() {
-//		uploadField.setText("");
+		// uploadField.setText("");
 		downloadField.setText("");
 		illegalUpload.setText("");
 		illegalDownload.setText("");
 		illegalClick.setText("");
 	}
 
-	private void startNodeAndFolder(String localPortNum) {
+	private void startNodeAndFolder(String localPortNum, boolean isFirstNode) {
 		String cloudPropName = Helper.chordPrefix + localPortNum + Helper.CLOUD_LIST;
 		String sentPropName = Helper.chordPrefix + localPortNum + Helper.SENT_FILE_LIST;
 		String namePropName = Helper.chordPrefix + localPortNum + Helper.NAME_LIST;
+		String nodeInfo = Helper.NODES_INFO;
 
 		DirName = FileUtils.createFolder(localPortNum);
 		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
+		if (isFirstNode) {
+			FileUtils.createFile(nodeInfo);
+		}
+		String sockInfo = local_ip + " "+localPortNum;
+		Props.updateProp(sockInfo , Helper.ACTIVE, nodeInfo);
+		
 		FileUtils.createFile(cloudPropName);
 		FileUtils.createFile(sentPropName);
 		FileUtils.createFile(namePropName);
-
+		
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
 	}
@@ -592,14 +602,13 @@ public class Main implements ActionListener {
 			sb.append(i + "\t" + Helper.longTo8DigitHex(ithstart) + "\t\t");
 			if (f != null) {
 				sb.append(f.toString() + "\t" + Helper.hexIdAndPosition(f));
-			}
-			else {
+			} else {
 				sb.append("NULL");
 			}
 			Log.print(sb.toString());
 		}
 	}
-	
+
 	private void selFileCall(String dirName) {
 		if (!isClickOK()) {
 			return;

@@ -230,4 +230,20 @@ public class Props {
 		}
 		return props;
 	}
+	
+	public static String[] getActiveNodesInfo() {
+		List<String> arrList = new ArrayList<>();
+		String propFileName = Helper.NODES_INFO;
+		Properties props = loadProp(propFileName);
+		Set<String> keys = props.stringPropertyNames();
+		for(String key : keys) {
+			String value = props.getProperty(key);
+			if (value.equals(Helper.ACTIVE)) {
+				arrList.add(key);
+			}
+		}
+		String[] nodesArr = new String[arrList.size()];
+		nodesArr = arrList.toArray(nodesArr);
+		return nodesArr;
+	}
 }

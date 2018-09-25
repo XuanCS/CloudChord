@@ -34,6 +34,7 @@ public class Helper {
 	public static final String SENT_FILE_LIST = "/sent_file.props";
 	public static final String CLOUD_LIST = "/cloud.props";
 	public static final String NAME_LIST = "/name.props";
+	public static final String NODES_INFO = "nodes.props";
 	public static final String CLIENT_SECRET = "client_secret.json";
 
 	public static final int CHORD_SIG = 0;
@@ -43,6 +44,8 @@ public class Helper {
 	public static final int FILEMOVE_SIG = 4;
 
 	public static final String fileCmd = "FILE";
+	public static final String ACTIVE = "Active";
+	public static final String INACTIVE = "Inactive";
 	
 	public static final long blockLen = 256;
 	public static final long lbLimit = 512;
