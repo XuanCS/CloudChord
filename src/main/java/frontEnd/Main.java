@@ -111,7 +111,7 @@ public class Main implements ActionListener {
 		illegalDownload = new JLabel();
 		illegalClick = new JLabel();
 		joinNodeLabel = new JLabel();
-		
+
 		frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
@@ -170,14 +170,14 @@ public class Main implements ActionListener {
 		startBtn.setBounds(secondX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		startBtn.addActionListener(this);
 		panel.add(startBtn);
-		
+
 		joinNodeLabel.setBounds(firstX_loc, belowSecondLineY_loc, LABEL_LONG_WIDTH, LABEL_HEIGHT);
 		panel.add(joinNodeLabel);
-		
+
 		JLabel nodeSelect = new JLabel("Plz Select to Join");
 		nodeSelect.setBounds(right_firstX_loc, aboveSecondLineY_loc, LABEL_WIDTH, LABEL_HEIGHT);
 		panel.add(nodeSelect);
-		
+
 		// Options in the combobox
 		String[] options = Props.getActiveNodesInfo();
 		JComboBox comboBox = new JComboBox(options);
@@ -191,8 +191,6 @@ public class Main implements ActionListener {
 			}
 		});
 		panel.add(comboBox);
-		
-
 
 		JButton joinBtn = new JButton("Join");
 		joinBtn.setBounds(secondX_loc, secondLineY_loc, button_WIDTH, button_HEIGHT);
@@ -315,7 +313,7 @@ public class Main implements ActionListener {
 	}
 
 	private void joinBtnCall() {
-		
+
 		localPortNum = follower.getText();
 		if (localPortNum == null || localPortNum.length() == 0) {
 			joinNodeLabel.setText("Please input port number");
@@ -369,11 +367,12 @@ public class Main implements ActionListener {
 		// iterate all files in cloud
 		String localSock = local_ip + " " + localPortNum;
 
-//		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
-		String sockInfo = local_ip + " "+localPortNum;
+		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
+		String sockInfo = local_ip + " " + localPortNum;
 		System.out.println("sock info: " + sockInfo);
-		Props.updateProp(sockInfo, Helper.INACTIVE, Helper.NODES_INFO);
-		if (isLastNode) {
+		if (!isLastNode) {
+			Props.updateProp(sockInfo, Helper.INACTIVE, Helper.NODES_INFO);
+		} else {
 			Props.rmPropKey(sockInfo, Helper.NODES_INFO);
 		}
 
@@ -534,17 +533,17 @@ public class Main implements ActionListener {
 		String nodeInfo = Helper.NODES_INFO;
 
 		DirName = FileUtils.createFolder(localPortNum);
-		String downloadDirName = FileUtils.createFolder(localPortNum) + Helper.DOWNLOADS;
+		String downloadDirName = FileUtils.createFolder(localPortNum + Helper.DOWNLOADS);
 		if (isFirstNode) {
 			FileUtils.createFile(nodeInfo);
 		}
-		String sockInfo = local_ip + " "+localPortNum;
-		Props.updateProp(sockInfo , Helper.ACTIVE, nodeInfo);
-		
+		String sockInfo = local_ip + " " + localPortNum;
+		Props.updateProp(sockInfo, Helper.ACTIVE, nodeInfo);
+
 		FileUtils.createFile(cloudPropName);
 		FileUtils.createFile(sentPropName);
 		FileUtils.createFile(namePropName);
-		
+
 		localAddress = Helper.createSocketAddress(local_ip + ":" + localPortNum);
 		m_node = new Node(localAddress, DirName);
 	}

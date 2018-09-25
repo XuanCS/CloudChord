@@ -74,7 +74,7 @@ public class Node {
 		stabilize.start();
 		fix_fingers.start();
 		ask_predecessor.start();
-		timer.start();
+//		timer.start();
 		return true;
 	}
 

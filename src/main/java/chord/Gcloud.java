@@ -213,7 +213,7 @@ public class Gcloud {
 			String propFileName = dirName + Helper.CLOUD_LIST;
 			service.files().delete(key).execute();
 			Props.rmPropKey(key, propFileName);
-			System.out.println("succesfully delte target file");
+			System.out.println("succesfully delete target file");
 		} catch (IOException e) {
 			System.out.println("An error occurred: " + e);
 		}

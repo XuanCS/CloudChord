@@ -31,7 +31,7 @@ public class FileUtils {
 		File dirFileName = new File(DirName);
 		if (!dirFileName.exists()) {
 			if (dirFileName.mkdir()) {
-				System.out.println("Directory is created!");
+				System.out.println("Directory " + DirName + " is created!");
 			} else {
 				System.out.println("Failed to create directory!");
 			}

@@ -48,7 +48,7 @@ public class Helper {
 	public static final String INACTIVE = "Inactive";
 	
 	public static final long blockLen = 256;
-	public static final long lbLimit = 512;
+	public static final long lbLimit = 2048;
 	public static long totalFileSize = 0;
 
 	public Helper() {
