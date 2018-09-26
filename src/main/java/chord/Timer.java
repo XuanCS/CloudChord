@@ -33,20 +33,22 @@ public class Timer extends Thread {
 			if (curTime == 30) {
 //				Helper.totalFileSize = 512;
 				if (Helper.totalFileSize >= Helper.lbLimit) {
+					System.out.println("\n" + DirName + "reached the Load Balance Limit");
+					
 					InetSocketAddress successor = localNode.getSuccessor();
 
 					// get target file name
 					String propFileName = DirName + Helper.CLOUD_LIST;
-					String randFileName = Props.getRandPropFile(propFileName);
-					randFileName = randFileName.split("_")[0];
-					System.out.println("randFile: " + randFileName);
+					String randFileNamePath = Props.getRandPropFile(propFileName);
+//					randFileName = randFileNamePath.split("_")[0];
+//					System.out.println("randFile: " + randFileName);
 
 					// send file to the successor
 					boolean isLastNode = Helper.checkLastNode(localNode, Main.localAddress);
 					if (!isLastNode) {
 						// get node info, keep track of where file comes from
-						String oriFileName = randFileName.split("_")[0];
-						String oriFileNode = randFileName.split("_")[1];
+						String oriFileName = randFileNamePath.split("_")[0];
+						String oriFileNode = randFileNamePath.split("_")[1];
 						System.out.println("oriFileName: " + oriFileName);
 
 						System.out.println("Current Node is Last One: " + isLastNode);

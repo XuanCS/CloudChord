@@ -48,7 +48,7 @@ public class Helper {
 	public static final String INACTIVE = "Inactive";
 
 	public static final long blockLen = 256;
-	public static final long lbLimit = 2048;
+	public static final long lbLimit = 800;
 	public static long totalFileSize = 0;
 
 	public Helper() {
@@ -367,6 +367,7 @@ public class Helper {
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
 			System.out.println("Sending " + fileName);
 
+
 			FileMsg msg = prepUploadMsg(dirName, fileName, lockSock, fromDownFolder, fileSize, myByteArray);
 			outputStream.writeObject(msg);
 			if (fromDownFolder) {
@@ -482,7 +483,7 @@ public class Helper {
 				System.out.println("downloading from cloud...");
 				// download from local cloud
 				Gcloud gc = new Gcloud(dirName);
-				gc.downLoadFile(fileName);
+				gc.downLoadFile(fileName, false);
 				res = "DOWNLOAD#" + downFileName;
 			} else if (type == FILESOCK_SIG) {
 				fileSockInfo(msg, dirName);
@@ -536,7 +537,9 @@ public class Helper {
 			} else {
 				// download and send to successor
 				for (String key : props.stringPropertyNames()) {
-					gc.downLoadFile(key);
+					gc.downLoadFile(key, false);
+					
+					System.out.println("key: " + key);
 					String srcFileName = key.split("_")[0];
 					String localSock = key.split("_")[1];
 					
@@ -593,12 +596,13 @@ public class Helper {
 		// String res = Props.findPrefixKey(fileName, propFileName);
 		System.out.println("res key is: " + fileName);
 		String res = Props.findPrefixKeyValue(fileName, propFileName)[1];
-		String fileSock = Props.findPrefixKeyValue(fileName, propFileName)[0];
+		String fileNameSock = Props.findPrefixKeyValue(fileName, propFileName)[0];
+		String fileSock = fileNameSock.split("_")[1];
 		Gcloud gc = new Gcloud(dirName);
 		if (isLastNode) {
 			gc.directDelFile(res);
 		} else {
-			gc.downLoadFile(fileName);
+			gc.downLoadFile(fileName, true);
 			// gc.directDelFile(res);
 			String tmp_response = Helper.sendFile(successor, dirName, fileName, fileSock, true);
 			System.out.println("sending: " + fileName + " success");

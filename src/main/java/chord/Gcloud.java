@@ -157,6 +157,7 @@ public class Gcloud {
 				String propFileTitle = Helper.genCldProSurfix(fileSock, title);
 				Props.updateProp(propFileTitle, res, propFileName);
 				Helper.totalFileSize += fileSize;
+				System.out.println("up total file size: " + Helper.totalFileSize);
 			}		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -165,7 +166,7 @@ public class Gcloud {
 		return res;
 	}
 
-	public void downLoadFile(String targetFN) {
+	public void downLoadFile(String targetFN, boolean isCalTotal) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		System.out.println("target FN: " + targetFN);
 		String res = Props.findPrefixKeyValue(targetFN, propFileName)[1];
@@ -177,14 +178,25 @@ public class Gcloud {
 		File file;
 		try {
 			file = service.files().get(res).execute();
+			long fileSize = file.size();
 			// downloads to target downloads folder
 			String downloadDirName = dirName + Helper.DOWNLOADS;
 
 			OutputStream out = new FileOutputStream(FileUtils.getLocalFileName(file.getName(), downloadDirName));
 			Drive.Files.Get request = service.files().get(res);
 			request.executeMediaAndDownloadTo(out);
+			
 			System.out.println("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
-			// deleteFile(targetFN);
+			if (isCalTotal) {
+				java.io.File f = new java.io.File(FileUtils.getLocalFileName(targetFN, dirName + Helper.DOWNLOADS));
+				if (f.exists()) {
+					Helper.totalFileSize -= f.length();
+					System.out.println("down total file size: " + Helper.totalFileSize);
+				} else {
+					System.out.println("download wired");
+				}
+
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

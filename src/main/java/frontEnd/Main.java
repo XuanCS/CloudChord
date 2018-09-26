@@ -464,7 +464,7 @@ public class Main implements ActionListener {
 				FileUtils.updateNamePropFile(hashFileName, splitFile, DirName);
 			}
 
-			System.out.println("cur total size: " + Helper.totalFileSize);
+			System.out.println("Main cur total size: " + Helper.totalFileSize);
 
 			// delete all the split files
 			FileUtils.deletelocalFile(DirName, hashFileName);
@@ -491,7 +491,7 @@ public class Main implements ActionListener {
 				String hashFileName = FileUtils.getFileHash(splitFile);
 				if (localAddress.equals(result)) {
 					Gcloud gc = new Gcloud(DirName);
-					gc.downLoadFile(hashFileName);
+					gc.downLoadFile(hashFileName, false);
 					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 							+ "\nsuccesfully download file: " + splitFile);
 
