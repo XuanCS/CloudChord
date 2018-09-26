@@ -46,7 +46,7 @@ public class Helper {
 	public static final String fileCmd = "FILE";
 	public static final String ACTIVE = "Active";
 	public static final String INACTIVE = "Inactive";
-	
+
 	public static final long blockLen = 256;
 	public static final long lbLimit = 2048;
 	public static long totalFileSize = 0;
@@ -61,12 +61,10 @@ public class Helper {
 		}
 	}
 
-
 	public static long hashSocketAddress(InetSocketAddress addr) {
 		int i = addr.hashCode();
 		return hashHashCode(i);
 	}
-
 
 	public static long hashString(String s) {
 		int i = s.hashCode();
@@ -495,11 +493,11 @@ public class Helper {
 				String sucNode = new String(file.getContents());
 				System.out.println("encfileName: " + encfileName);
 				System.out.println("sucNode: " + sucNode);
-				
+
 				String nameProp = dirName + Helper.NAME_LIST;
 				String sentProp = dirName + Helper.SENT_FILE_LIST;
 
-				String srcFileName = Props.seekProp(encfileName, nameProp);	
+				String srcFileName = Props.seekProp(encfileName, nameProp);
 				System.out.println("srcFileName: " + srcFileName);
 				Props.updateProp(srcFileName, sucNode, sentProp);
 				System.out.println("succesfully update dest of " + srcFileName + "to " + sucNode);
@@ -528,25 +526,33 @@ public class Helper {
 			props.load(in);
 			in.close();
 
-			for (String key : props.stringPropertyNames()) {
-				String res = props.getProperty(key);
-				Gcloud gc = new Gcloud(dirName);
-				if (isLastNode) {
+			Gcloud gc = new Gcloud(dirName);
+			if (isLastNode) {
+				for (String key : props.stringPropertyNames()) {
+					String res = props.getProperty(key);
 					gc.directDelFile(res);
-				} else {
-					gc.downLoadFile(key);
-					gc.directDelFile(res);
-					String tmp_response = Helper.sendFile(successor, dirName, key, true);
-					System.out.println("sending: " + key + " success");
-					System.out.println("feedback: " + tmp_response);
+					System.out.println();
 				}
-				System.out.println();
+			} else {
+				// download and send to successor
+				for (String key : props.stringPropertyNames()) {
+					gc.downLoadFile(key);
+					String srcFileName = key.split("_")[0];
+					String tmp_response = Helper.sendFile(successor, dirName, srcFileName, true);
+					System.out.println("sending: " + srcFileName + " success");
+					System.out.println("feedback: " + tmp_response);
+					System.out.println();
+				}
+				// delete cloud.prop
+				for (String key : props.stringPropertyNames()) {
+					String res = props.getProperty(key);
+					gc.directDelFile(res);
+					System.out.println();
+				}
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -569,7 +575,7 @@ public class Helper {
 	public static void downSendOneCloudFile(String fileName, String dirName, InetSocketAddress successor,
 			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
-//		String res = Props.findPrefixKey(fileName, propFileName);
+		// String res = Props.findPrefixKey(fileName, propFileName);
 		System.out.println("res key is: " + fileName);
 		String res = Props.findPrefixValue(fileName, propFileName);
 		Gcloud gc = new Gcloud(dirName);
@@ -577,7 +583,7 @@ public class Helper {
 			gc.directDelFile(res);
 		} else {
 			gc.downLoadFile(fileName);
-//			gc.directDelFile(res);
+			// gc.directDelFile(res);
 			String tmp_response = Helper.sendFile(successor, dirName, fileName, true);
 			System.out.println("sending: " + fileName + " success");
 			System.out.println("feedback: " + tmp_response);
@@ -644,7 +650,7 @@ public class Helper {
 	public static String genCldProSurfix(String fileSockDir, String title) {
 		return title + "_" + fileSockDir;
 	}
-	
+
 	public static boolean checkLastNode(Node m_node, InetSocketAddress localAddress) {
 		// check whether this is the last node
 		InetSocketAddress successor = m_node.getSuccessor();
@@ -657,7 +663,6 @@ public class Helper {
 		}
 		return isRes;
 	}
-	
 
 	// public static String getCldFileName(String targetFN) {
 	// return targetFN.split("_")[1];

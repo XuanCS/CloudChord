@@ -183,7 +183,7 @@ public class Props {
 		Log.print();
 		for (String key : keys) {
 			String value = props.getProperty(key);
-			String tmpOutput = key + "\t" + value;
+			String tmpOutput = key + "\t\t" + value;
 			Log.print(tmpOutput);
 		}
 	}
