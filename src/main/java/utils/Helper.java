@@ -345,7 +345,7 @@ public class Helper {
 	 * Send File to server and read response
 	 * 
 	 */
-	public static String sendFile(InetSocketAddress server, String dirName, String fileName, boolean fromDownFolder) {
+	public static String sendFile(InetSocketAddress server, String dirName, String fileName, String lockSock, boolean fromDownFolder) {
 		// invalid input
 		if (server == null || fileName == null)
 			return null;
@@ -367,7 +367,7 @@ public class Helper {
 			ObjectOutputStream outputStream = new ObjectOutputStream(talkSocket.getOutputStream());
 			System.out.println("Sending " + fileName);
 
-			FileMsg msg = prepUploadMsg(dirName, fileName, fromDownFolder, fileSize, myByteArray);
+			FileMsg msg = prepUploadMsg(dirName, fileName, lockSock, fromDownFolder, fileSize, myByteArray);
 			outputStream.writeObject(msg);
 			if (fromDownFolder) {
 				FileUtils.deletelocalFile(downLoadDirName, fileName);
@@ -515,17 +515,17 @@ public class Helper {
 		return res;
 	}
 
-	public static void downSendAllCloudFiles(String dirName, String localSock, InetSocketAddress successor,
+	public static void downSendAllCloudFiles(String dirName, InetSocketAddress successor,
 			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		FileInputStream in;
 		try {
 			in = new FileInputStream(propFileName);
-
 			Properties props = new Properties();
 			props.load(in);
 			in.close();
 
+			// last node do not migrate files, only delete cloud files
 			Gcloud gc = new Gcloud(dirName);
 			if (isLastNode) {
 				for (String key : props.stringPropertyNames()) {
@@ -538,10 +538,25 @@ public class Helper {
 				for (String key : props.stringPropertyNames()) {
 					gc.downLoadFile(key);
 					String srcFileName = key.split("_")[0];
-					String tmp_response = Helper.sendFile(successor, dirName, srcFileName, true);
+					String localSock = key.split("_")[1];
+					
+					String tmp_response = Helper.sendFile(successor, dirName, srcFileName, localSock, true);
 					System.out.println("sending: " + srcFileName + " success");
 					System.out.println("feedback: " + tmp_response);
 					System.out.println();
+					
+					String succIP = successor.getAddress().toString().split("/")[1];
+					String succPort = Integer.toString(successor.getPort());
+					String succSock = succIP + " " + succPort;
+					System.out.println("succSock: " + succSock);
+
+					String oriFileNode = key.split("_")[1];
+					System.out.println("oriFileNode: " + oriFileNode);
+					String srcIP = oriFileNode.split(" ")[0];
+					String srcPort = oriFileNode.split(" ")[1];
+					InetSocketAddress srcSock = Helper.createSocketAddress(srcIP + ":" + srcPort);
+
+					Helper.sendSentPropSig(srcFileName, succSock, srcSock);
 				}
 				// delete cloud.prop
 				for (String key : props.stringPropertyNames()) {
@@ -577,14 +592,15 @@ public class Helper {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		// String res = Props.findPrefixKey(fileName, propFileName);
 		System.out.println("res key is: " + fileName);
-		String res = Props.findPrefixValue(fileName, propFileName);
+		String res = Props.findPrefixKeyValue(fileName, propFileName)[1];
+		String fileSock = Props.findPrefixKeyValue(fileName, propFileName)[0];
 		Gcloud gc = new Gcloud(dirName);
 		if (isLastNode) {
 			gc.directDelFile(res);
 		} else {
 			gc.downLoadFile(fileName);
 			// gc.directDelFile(res);
-			String tmp_response = Helper.sendFile(successor, dirName, fileName, true);
+			String tmp_response = Helper.sendFile(successor, dirName, fileName, fileSock, true);
 			System.out.println("sending: " + fileName + " success");
 			System.out.println("feedback: " + tmp_response);
 		}
@@ -614,14 +630,14 @@ public class Helper {
 		System.out.println("Object received: " + msg);
 	}
 
-	private static FileMsg prepUploadMsg(String dirName, String fileName, boolean fromDownFolder, int fileSize,
+	private static FileMsg prepUploadMsg(String dirName, String fileName, String lockSock, boolean fromDownFolder, int fileSize,
 			byte[] myByteArray) {
 
 		FileMsg msg = new FileMsg(UPLOAD_SIG, Helper.fileCmd);
 		msg.setFileName(fileName);
 		msg.setFileSize(fileSize);
 		msg.setContents(myByteArray);
-		msg.setFileSockInfo(dirName);
+		msg.setFileSockInfo(lockSock);
 		return msg;
 	}
 

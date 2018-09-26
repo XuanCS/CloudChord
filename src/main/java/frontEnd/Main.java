@@ -367,7 +367,7 @@ public class Main implements ActionListener {
 		// iterate all files in cloud
 		String localSock = local_ip + " " + localPortNum;
 
-		Helper.downSendAllCloudFiles(DirName, localSock, successor, isLastNode);
+		Helper.downSendAllCloudFiles(DirName, successor, isLastNode);
 		String sockInfo = local_ip + " " + localPortNum;
 		System.out.println("sock info: " + sockInfo);
 		if (!isLastNode) {
@@ -451,7 +451,7 @@ public class Main implements ActionListener {
 					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
 							+ "\nsuccesfully upload file: " + splitFile);
 				} else {
-					String tmp_response = Helper.sendFile(result, DirName, hashFileName, false);
+					String tmp_response = Helper.sendFile(result, DirName, hashFileName, localSock, false);
 					System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
 					System.out.println("feedback: " + tmp_response);
 					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)

@@ -139,7 +139,8 @@ public class Props {
 		return null;
 	}
 
-	public static String findPrefixValue(String target, String propFileName) {
+	public static String[] findPrefixKeyValue(String target, String propFileName) {
+		String[] strArr = new String[2];
 		Properties props = loadProp(propFileName);
 		// Iterating properties using For-Each
 		Set<String> keys = props.stringPropertyNames();
@@ -148,7 +149,9 @@ public class Props {
 				System.out.println("key is: " + key);
 				String sock = key.split("_")[1];
 				System.out.println("sock is: " + sock);
-				return props.getProperty(key);
+				strArr[0] = key;
+				strArr[1] = props.getProperty(key);
+				return strArr;
 			}
 		}
 		return null;

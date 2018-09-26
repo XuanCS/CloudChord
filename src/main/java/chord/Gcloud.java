@@ -168,7 +168,7 @@ public class Gcloud {
 	public void downLoadFile(String targetFN) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
 		System.out.println("target FN: " + targetFN);
-		String res = Props.findPrefixValue(targetFN, propFileName);
+		String res = Props.findPrefixKeyValue(targetFN, propFileName)[1];
 		if (res == null) {
 			System.out.println("cannot download the target file");
 			return;
