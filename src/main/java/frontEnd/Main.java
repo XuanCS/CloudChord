@@ -206,6 +206,11 @@ public class Main implements ActionListener {
 		ftBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		ftBtn.addActionListener(this);
 		panel.add(ftBtn);
+		
+		JButton lbBtn = new JButton("LoadBal");
+		lbBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
+		lbBtn.addActionListener(this);
+		panel.add(lbBtn);
 
 		JButton quitBtn = new JButton("Quit");
 		quitBtn.setBounds(fifthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
@@ -271,6 +276,9 @@ public class Main implements ActionListener {
 			break;
 		case "FigureTbl":
 			ftBtnCall();
+			break;
+		case "LoadBal":
+			lbBtnCall();
 			break;
 		case "Quit":
 			quitBtnCall();
@@ -353,6 +361,13 @@ public class Main implements ActionListener {
 			return;
 		}
 		printFTInfo();
+	}
+	
+	private void lbBtnCall() {
+		if (!isClickOK()) {
+			return;
+		}
+		m_node.initTimer();
 	}
 
 	private void quitBtnCall() {

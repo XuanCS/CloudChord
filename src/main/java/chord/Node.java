@@ -74,7 +74,6 @@ public class Node {
 		stabilize.start();
 		fix_fingers.start();
 		ask_predecessor.start();
-		timer.start();
 		return true;
 	}
 
@@ -414,6 +413,10 @@ public class Node {
 	
 	public  Map<Integer, InetSocketAddress> getFiger() {
 		return finger;
+	}
+	
+	public void initTimer() {
+		timer.start();
 	}
 
 

@@ -69,7 +69,7 @@ public class Timer extends Thread {
 				curTime = 0;
 			}
 			
-//			System.out.println("current time:" + curTime);
+			System.out.println("current time:" + curTime);
 			try {
 				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) {
