@@ -441,6 +441,7 @@ public class Main implements ActionListener {
 		// send out the each of file
 		for (String splitFile : allList) {
 			System.out.println("\nCurrent Split File: " + splitFile);
+			Log.print("\nCurrent Split File: " + splitFile);
 
 			// send out the split file
 			String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
@@ -455,22 +456,21 @@ public class Main implements ActionListener {
 				// FileUtils.updateNamePropFile(splitFile, DirName,
 				// hashFileName);
 				String localSock = local_ip + " " + localPortNum;
-				System.out.println("sock: " + localSock);
 
 				// send out files
 				InetSocketAddress result = FileUtils.getFileSuccessor(hashFileName, localAddress);
 				if (result.equals(localAddress)) {
 					Gcloud gc = new Gcloud(DirName);
+//					Log.print("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
+					Log.print("file " + splitFile + ", Upload to target cloud of Node: " + result.toString());
 					gc.uploadTextFile(hashFileName, localSock);
 
-					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-							+ "\nsuccesfully upload file: " + splitFile);
 				} else {
+//					Log.print("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
+					Log.print("file " + splitFile + ", Upload to target cloud of Node: " + result.toString());
 					String tmp_response = Helper.sendFile(result, DirName, hashFileName, localSock, false);
 					System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
 					System.out.println("feedback: " + tmp_response);
-					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-							+ "\nsuccesfully send file to successor cloud account, and upload file: " + splitFile);
 				}
 
 				// keep track of all the uploaded files from current
@@ -484,6 +484,7 @@ public class Main implements ActionListener {
 			// delete all the split files
 			FileUtils.deletelocalFile(DirName, hashFileName);
 		}
+		Log.print();
 	}
 
 	private void downloadBtnCall() {
@@ -506,15 +507,14 @@ public class Main implements ActionListener {
 				String hashFileName = FileUtils.getFileHash(splitFile);
 				if (localAddress.equals(result)) {
 					Gcloud gc = new Gcloud(DirName);
+//					Log.print("\nCurrent downloading file: " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
+					Log.print("\nCurrent downloading file: " + splitFile + ", Downlaod from target cloud of Node: " + result.toString());
 					gc.downLoadFile(hashFileName, false);
-					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-							+ "\nsuccesfully download file: " + splitFile);
-
 				} else {
+//					Log.print("\nCurrent downloading file: " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
+					Log.print("\nCurrent downloading file: " + splitFile + ", Downlaod from target cloud of Node: " + result.toString());
 					String res = Helper.sendQueryFile(result, DirName, hashFileName);
 					System.out.println("feedback: " + res);
-					output.setText("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile)
-							+ "\nsuccesfully download file: " + splitFile + " from target cloud account");
 				}
 				FileUtils.renameFile(hashFileName, splitFile, DirName + Helper.DOWNLOADS);
 			}

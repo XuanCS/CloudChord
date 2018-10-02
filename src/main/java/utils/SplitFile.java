@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import frontEnd.Log;
+
 public class SplitFile {
 	public static void join(String fileName, String dirName) {
 		long leninfile = 0, leng = 0;
@@ -35,6 +37,7 @@ public class SplitFile {
 				}
 			}
 			System.out.println("finish joining " + fileName);
+			Log.print("finish joining " + fileName);
 			outfile.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,6 +73,7 @@ public class SplitFile {
 			}
 			infile.close();
 			System.out.println("finish spliting " + fileName);
+			Log.print("finish spliting " + fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

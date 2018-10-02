@@ -14,6 +14,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 
+import frontEnd.Log;
 import frontEnd.Main;
 import utils.FileUtils;
 import utils.Helper;
@@ -142,6 +143,7 @@ public class Gcloud {
 		long fileSize = fileContent.length();
 		if (service.files() == null) {
 			System.out.println("service is null");
+			Log.print(("service is null"));
 		}
 
 		File file;
@@ -153,11 +155,13 @@ public class Gcloud {
 
 			if (res != null) {
 				System.out.println("successfully upload: " + title);
+				Log.print("successfully upload: " + title);
 				String propFileName = dirName + Helper.CLOUD_LIST;
 				String propFileTitle = Helper.genCldProSurfix(fileSock, title);
 				Props.updateProp(propFileTitle, res, propFileName);
 				Helper.totalFileSize += fileSize;
-				System.out.println("up total file size: " + Helper.totalFileSize);
+				System.out.println("total upload file size: " + Helper.totalFileSize);
+				Log.print("up total file size: " + Helper.totalFileSize);
 			}		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -172,6 +176,7 @@ public class Gcloud {
 		String res = Props.findPrefixKeyValue(targetFN, propFileName)[1];
 		if (res == null) {
 			System.out.println("cannot download the target file");
+			Log.print("cannot download the target file");
 			return;
 		}
 
@@ -187,13 +192,16 @@ public class Gcloud {
 			request.executeMediaAndDownloadTo(out);
 			
 			System.out.println("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
+			Log.print("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
 			if (isCalTotal) {
 				java.io.File f = new java.io.File(FileUtils.getLocalFileName(targetFN, dirName + Helper.DOWNLOADS));
 				if (f.exists()) {
 					Helper.totalFileSize -= f.length();
 					System.out.println("down total file size: " + Helper.totalFileSize);
+					Log.print("down total file size: " + Helper.totalFileSize);
 				} else {
 					System.out.println("download wired");
+					Log.print("download wired");
 				}
 
 			}
@@ -208,13 +216,15 @@ public class Gcloud {
 			String propFileName = dirName + Helper.CLOUD_LIST;
 			String res = Props.readProp(targetFN, propFileName);
 			if (res == null) {
-				System.out.println("cannot download the target file");
+				System.out.println("cannot delete the target file");
+				Log.print("cannot delete the target file");
 				return;
 			}
 
 			service.files().delete(res).execute();
 			Props.rmPropKey(targetFN, propFileName);
 			System.out.println("succesfully delete target file");
+			Log.print("succesfully delete target file: " + targetFN);
 		} catch (IOException e) {
 			System.out.println("An error occurred: " + e);
 		}
@@ -226,6 +236,7 @@ public class Gcloud {
 			service.files().delete(key).execute();
 			Props.rmPropKey(key, propFileName);
 			System.out.println("succesfully delete target file");
+			Log.print("succesfully delete target file");
 		} catch (IOException e) {
 			System.out.println("An error occurred: " + e);
 		}
