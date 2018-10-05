@@ -206,7 +206,7 @@ public class Main implements ActionListener {
 		ftBtn.setBounds(fourthX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		ftBtn.addActionListener(this);
 		panel.add(ftBtn);
-		
+
 		JButton lbBtn = new JButton("LoadBal");
 		lbBtn.setBounds(lastX_loc, firstLineY_loc, button_WIDTH, button_HEIGHT);
 		lbBtn.addActionListener(this);
@@ -362,11 +362,12 @@ public class Main implements ActionListener {
 		}
 		printFTInfo();
 	}
-	
+
 	private void lbBtnCall() {
 		if (!isClickOK()) {
 			return;
 		}
+		Log.print("Start Load Balance, check load every " + Helper.lbTimer + " seconds");
 		m_node.initTimer();
 	}
 
@@ -439,9 +440,9 @@ public class Main implements ActionListener {
 		List<String> allList = Helper.genTotalList(splitList, DirName);
 
 		// send out the each of file
+		Log.print();
 		for (String splitFile : allList) {
 			System.out.println("\nCurrent Split File: " + splitFile);
-			Log.print("\nCurrent Split File: " + splitFile);
 
 			// send out the split file
 			String targetFilePath = FileUtils.getLocalFileName(splitFile, DirName);
@@ -458,16 +459,21 @@ public class Main implements ActionListener {
 				String localSock = local_ip + " " + localPortNum;
 
 				// send out files
+				Log.print();
+				Log.print("Current Split File: " + splitFile);
 				InetSocketAddress result = FileUtils.getFileSuccessor(hashFileName, localAddress);
+				Log.print("file " + splitFile + ", Upload to target cloud of Node: " + result.toString());
+
 				if (result.equals(localAddress)) {
 					Gcloud gc = new Gcloud(DirName);
-//					Log.print("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
-					Log.print("file " + splitFile + ", Upload to target cloud of Node: " + result.toString());
+					// Log.print("file " + splitFile + ", Position is " +
+					// Helper.hexFileNameAndPosition(splitFile));
 					gc.uploadTextFile(hashFileName, localSock);
+					Log.print();
 
 				} else {
-//					Log.print("file " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
-					Log.print("file " + splitFile + ", Upload to target cloud of Node: " + result.toString());
+					// Log.print("file " + splitFile + ", Position is " +
+					// Helper.hexFileNameAndPosition(splitFile));
 					String tmp_response = Helper.sendFile(result, DirName, hashFileName, localSock, false);
 					System.out.println("sending: " + splitFile + "(" + hashFileName + ")" + " success");
 					System.out.println("feedback: " + tmp_response);
@@ -496,6 +502,7 @@ public class Main implements ActionListener {
 		String sentPropFileName = DirName + Helper.SENT_FILE_LIST;
 		List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
 
+		Log.print();
 		for (String splitFile : splitList) {
 			String targetSock = FileUtils.isFromSentProp(splitFile, DirName);
 			InetSocketAddress result = Helper
@@ -505,14 +512,19 @@ public class Main implements ActionListener {
 				illegalDownload.setText("the target file does not belong with the current user");
 			} else {
 				String hashFileName = FileUtils.getFileHash(splitFile);
+				Log.print("Current downloading file: " + splitFile + ", Downlaod from target cloud of Node: "
+						+ result.toString());
+
 				if (localAddress.equals(result)) {
 					Gcloud gc = new Gcloud(DirName);
-//					Log.print("\nCurrent downloading file: " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
-					Log.print("\nCurrent downloading file: " + splitFile + ", Downlaod from target cloud of Node: " + result.toString());
+					// Log.print("\nCurrent downloading file: " + splitFile + ",
+					// Position is " +
+					// Helper.hexFileNameAndPosition(splitFile));
 					gc.downLoadFile(hashFileName, false);
 				} else {
-//					Log.print("\nCurrent downloading file: " + splitFile + ", Position is " + Helper.hexFileNameAndPosition(splitFile));
-					Log.print("\nCurrent downloading file: " + splitFile + ", Downlaod from target cloud of Node: " + result.toString());
+					// Log.print("\nCurrent downloading file: " + splitFile + ",
+					// Position is " +
+					// Helper.hexFileNameAndPosition(splitFile));
 					String res = Helper.sendQueryFile(result, DirName, hashFileName);
 					System.out.println("feedback: " + res);
 				}
@@ -525,6 +537,7 @@ public class Main implements ActionListener {
 		String downloadFolder = DirName + Helper.DOWNLOADS;
 		SplitFile.join(encFileName, downloadFolder);
 		Encryption.decrpt(encFileName, DirName, inputFileName);
+		Log.print();
 
 		// delete encoded file and split files
 		for (String splitFile : splitList) {

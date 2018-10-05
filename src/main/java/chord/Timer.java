@@ -3,6 +3,7 @@ package chord;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import frontEnd.Log;
 import frontEnd.Main;
 import utils.Helper;
 import utils.Props;
@@ -12,7 +13,7 @@ public class Timer extends Thread {
 	private Node localNode;
 	private String DirName;
 	boolean alive;
-	
+
 	public Timer(Node node, String dirName) {
 		localNode = node;
 		alive = true;
@@ -30,22 +31,24 @@ public class Timer extends Thread {
 	@Override
 	public void run() {
 		while (alive) {
-			if (curTime == 30) {
-//				Helper.totalFileSize = 512;
-				if (Helper.totalFileSize >= Helper.lbLimit) {
-					System.out.println("\n" + DirName + "reached the Load Balance Limit");
-					
-					InetSocketAddress successor = localNode.getSuccessor();
+			if (curTime == Helper.lbTimer) {
+				// Helper.totalFileSize = 512;
 
-					// get target file name
-					String propFileName = DirName + Helper.CLOUD_LIST;
-					String randFileNamePath = Props.getRandPropFile(propFileName);
-//					randFileName = randFileNamePath.split("_")[0];
-//					System.out.println("randFile: " + randFileName);
+				boolean isLastNode = Helper.checkLastNode(localNode, Main.localAddress);
+				if (!isLastNode) {
+					if (Helper.totalFileSize >= Helper.lbLimit) {
 
-					// send file to the successor
-					boolean isLastNode = Helper.checkLastNode(localNode, Main.localAddress);
-					if (!isLastNode) {
+						InetSocketAddress successor = localNode.getSuccessor();
+
+						// get target file name
+						String propFileName = DirName + Helper.CLOUD_LIST;
+						String randFileNamePath = Props.getRandPropFile(propFileName);
+						// randFileName = randFileNamePath.split("_")[0];
+						// System.out.println("randFile: " + randFileName);
+
+						// send file to the successor
+						System.out.println("\n" + DirName + "reached the Load Balance Limit");
+						Log.nlPrint(DirName + " reached the Load Balance Limit");
 						// get node info, keep track of where file comes from
 						String oriFileName = randFileNamePath.split("_")[0];
 						String oriFileNode = randFileNamePath.split("_")[1];
@@ -68,8 +71,8 @@ public class Timer extends Thread {
 				}
 				curTime = 0;
 			}
-			
-//			System.out.println("current time:" + curTime);
+
+			// System.out.println("current time:" + curTime);
 			try {
 				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) {
@@ -78,7 +81,7 @@ public class Timer extends Thread {
 			curTime++;
 		}
 	}
-	
+
 	public void toDie() {
 		alive = false;
 	}

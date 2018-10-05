@@ -156,16 +156,29 @@ public class Props {
 		}
 		return null;
 	}
+	
+	
+	public static void directRmPropKey(String rmKey, String propFileName) {
+		Properties props = loadProp(propFileName);
+		FileOutputStream out;
+		try {
+			out = new FileOutputStream(propFileName);
+			props.remove(rmKey);
+			props.store(out, null);
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public static void rmPropKey(String key, String propFileName) {
-		FileInputStream in;
+		Properties props = loadProp(propFileName);
 		try {
-			in = new FileInputStream(propFileName);
 			FileOutputStream out = new FileOutputStream(propFileName);
-
-			Properties props = new Properties();
-			props.load(in);
-			in.close();
 			props.remove(key);
 			props.store(out, null);
 			out.close();

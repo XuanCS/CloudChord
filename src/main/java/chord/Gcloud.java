@@ -161,7 +161,8 @@ public class Gcloud {
 				Props.updateProp(propFileTitle, res, propFileName);
 				Helper.totalFileSize += fileSize;
 				System.out.println("total upload file size: " + Helper.totalFileSize);
-				Log.print("up total file size: " + Helper.totalFileSize);
+				Log.print("upload total file size: " + Helper.totalFileSize);
+				Log.print();
 			}		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -192,13 +193,14 @@ public class Gcloud {
 			request.executeMediaAndDownloadTo(out);
 			
 			System.out.println("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
-			Log.print("successfully download file" + targetFN + " to " + dirName + Helper.DOWNLOADS);
+			Log.print("successfully download file: " + targetFN + " to " + dirName + Helper.DOWNLOADS);
+			Log.print();
 			if (isCalTotal) {
 				java.io.File f = new java.io.File(FileUtils.getLocalFileName(targetFN, dirName + Helper.DOWNLOADS));
 				if (f.exists()) {
 					Helper.totalFileSize -= f.length();
 					System.out.println("down total file size: " + Helper.totalFileSize);
-					Log.print("down total file size: " + Helper.totalFileSize);
+					Log.print("download total file size: " + Helper.totalFileSize);
 				} else {
 					System.out.println("download wired");
 					Log.print("download wired");
@@ -230,11 +232,17 @@ public class Gcloud {
 		}
 	}
 
-	public void directDelFile(String key) {
+	public void directDelFile(String gFileName, String prefixName) {
 		try {
 			String propFileName = dirName + Helper.CLOUD_LIST;
-			service.files().delete(key).execute();
-			Props.rmPropKey(key, propFileName);
+			service.files().delete(gFileName).execute();
+			System.err.println("propKey: " + prefixName);
+			
+			String rmKey = Props.findPrefixKey(prefixName, propFileName);
+			System.err.println("remove key is: " + rmKey);
+
+			Props.directRmPropKey(rmKey, propFileName);		
+
 			System.out.println("succesfully delete target file");
 			Log.print("succesfully delete target file");
 		} catch (IOException e) {

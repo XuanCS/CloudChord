@@ -49,6 +49,7 @@ public class Helper {
 
 	public static final long blockLen = 256;
 	public static final long lbLimit = 800;
+	public static final int lbTimer = 10;
 	public static long totalFileSize = 0;
 
 	public Helper() {
@@ -531,7 +532,7 @@ public class Helper {
 			if (isLastNode) {
 				for (String key : props.stringPropertyNames()) {
 					String res = props.getProperty(key);
-					gc.directDelFile(res);
+					gc.directDelFile(res, key);
 					System.out.println();
 				}
 			} else {
@@ -564,7 +565,7 @@ public class Helper {
 				// delete cloud.prop
 				for (String key : props.stringPropertyNames()) {
 					String res = props.getProperty(key);
-					gc.directDelFile(res);
+					gc.directDelFile(res, key);
 					System.out.println();
 				}
 			}
@@ -593,17 +594,21 @@ public class Helper {
 	public static void downSendOneCloudFile(String fileName, String dirName, InetSocketAddress successor,
 			boolean isLastNode) {
 		String propFileName = dirName + Helper.CLOUD_LIST;
-		// String res = Props.findPrefixKey(fileName, propFileName);
 		System.out.println("res key is: " + fileName);
-		String res = Props.findPrefixKeyValue(fileName, propFileName)[1];
+		
+		String gFileName = Props.findPrefixKeyValue(fileName, propFileName)[1];
 		String fileNameSock = Props.findPrefixKeyValue(fileName, propFileName)[0];
 		String fileSock = fileNameSock.split("_")[1];
+		
 		Gcloud gc = new Gcloud(dirName);
 		if (isLastNode) {
-			gc.directDelFile(res);
+			gc.directDelFile(gFileName, fileName);
 		} else {
 			gc.downLoadFile(fileName, true);
-			// gc.directDelFile(res);
+			System.out.println("downSendOneCloudFile res is: " + gFileName);
+			
+			// pass array
+			gc.directDelFile(gFileName, fileName);
 			String tmp_response = Helper.sendFile(successor, dirName, fileName, fileSock, true);
 			System.out.println("sending: " + fileName + " success");
 			System.out.println("feedback: " + tmp_response);
