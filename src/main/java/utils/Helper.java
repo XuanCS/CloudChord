@@ -48,9 +48,11 @@ public class Helper {
 	public static final String INACTIVE = "Inactive";
 
 	public static final long blockLen = 256;
-	public static final long lbLimit = 800;
+//	public static final long lbLimit = 800;
+	public static final long lbLimit = 256 * 4 * 6;
 	public static final int lbTimer = 10;
 	public static long totalFileSize = 0;
+	public static int numEachUpload = 0;
 
 	public Helper() {
 		// initialize power of two table
@@ -81,19 +83,17 @@ public class Helper {
 	 */
 	private static long hashHashCode(int i) {
 
-		// 32 bit regular hash code -> byte[4]
 		byte[] hashbytes = new byte[4];
 		hashbytes[0] = (byte) (i >> 24);
 		hashbytes[1] = (byte) (i >> 16);
 		hashbytes[2] = (byte) (i >> 8);
-		hashbytes[3] = (byte) (i /* >> 0 */);
+		hashbytes[3] = (byte) (i);
 
 		// try to create SHA1 digest
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -688,8 +688,4 @@ public class Helper {
 		}
 		return isRes;
 	}
-
-	// public static String getCldFileName(String targetFN) {
-	// return targetFN.split("_")[1];
-	// }
 }

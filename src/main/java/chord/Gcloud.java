@@ -160,7 +160,9 @@ public class Gcloud {
 				String propFileTitle = Helper.genCldProSurfix(fileSock, title);
 				Props.updateProp(propFileTitle, res, propFileName);
 				Helper.totalFileSize += fileSize;
+				Helper.numEachUpload += 1;
 				System.out.println("total upload file size: " + Helper.totalFileSize);
+				System.out.println("Number of file upload: " + Helper.numEachUpload);
 				Log.print("upload total file size: " + Helper.totalFileSize);
 				Log.print();
 			}		
@@ -236,10 +238,8 @@ public class Gcloud {
 		try {
 			String propFileName = dirName + Helper.CLOUD_LIST;
 			service.files().delete(gFileName).execute();
-			System.err.println("propKey: " + prefixName);
 			
 			String rmKey = Props.findPrefixKey(prefixName, propFileName);
-			System.err.println("remove key is: " + rmKey);
 
 			Props.directRmPropKey(rmKey, propFileName);		
 

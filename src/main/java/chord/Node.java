@@ -2,14 +2,9 @@ package chord;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-
 import utils.Helper;
 
-/**
- * Node class that implements the core data structure 
- * and functionalities of a chord node
- *
- */
+
 
 public class Node {
 
@@ -20,79 +15,57 @@ public class Node {
 
 	private Listener listener;
 	private Stabilize stabilize;
-	private FixFingers fix_fingers;
-	private AskPredecessor ask_predecessor;
+	private FixFingers fixFinger;
+	private AskPredecessor askPred;
 	private Timer timer;
 
-	/**
-	 * Constructor
-	 * @param address: this node's local address
-	 */
 	public Node (InetSocketAddress address, String dirName) {
 
 		localAddress = address;
 		localId = Helper.hashSocketAddress(localAddress);
+		predecessor = null;
 
-		// initialize an empty finge table
+
 		finger = new HashMap<Integer, InetSocketAddress>();
 		for (int i = 1; i <= 32; i++) {
 			updateIthFinger (i, null);
 		}
 
-		// initialize predecessor
-		predecessor = null;
-
 		// initialize threads
 		listener = new Listener(this, dirName);
 		stabilize = new Stabilize(this);
-		fix_fingers = new FixFingers(this);
-		ask_predecessor = new AskPredecessor(this);
+		fixFinger = new FixFingers(this);
+		askPred = new AskPredecessor(this);
 		timer = new Timer(this, dirName);
 	}
 
-	/**
-	 * Create or join a ring 
-	 * @param contact
-	 * @return true if successfully create a ring
-	 * or join a ring via contact
-	 */
-	public boolean join (InetSocketAddress contact) {
 
-		// if contact is other node (join ring), try to contact that node
-		// (contact will never be null)
+	public boolean join (InetSocketAddress contact) {
 		if (contact != null && !contact.equals(localAddress)) {
 			InetSocketAddress successor = Helper.requestAddress(contact, "FINDSUCC_" + localId);
 			if (successor == null)  {
-				System.out.println("\nCannot find node you are trying to contact. Please exit.\n");
+				System.out.println("\nCould not find node you are trying to contact.\n");
 				return false;
 			}
 			updateIthFinger(1, successor);
 		}
 
-		// start all threads	
 		listener.start();
 		stabilize.start();
-		fix_fingers.start();
-		ask_predecessor.start();
+		fixFinger.start();
+		askPred.start();
 		return true;
 	}
 
-	/**
-	 * Notify successor that this node should be its predecessor
-	 * @param successor
-	 * @return successor's response
-	 */
+	
 	public String notify(InetSocketAddress successor) {
-		if (successor!=null && !successor.equals(localAddress))
+		if (successor!=null && !successor.equals(localAddress)) {		
 			return Helper.sendRequest(successor, "IAMPRE_"+localAddress.getAddress().toString()+":"+localAddress.getPort());
-		else
-			return null;
+		}
+		return null;
 	}
 
-	/**
-	 * Being notified by another node, set it as my predecessor if it is.
-	 * @param newpre
-	 */
+
 	public void notified (InetSocketAddress newpre) {
 		if (predecessor == null || predecessor.equals(localAddress)) {
 			this.setPredecessor(newpre);
@@ -106,36 +79,20 @@ public class Node {
 		}
 	}
 
-	/**
-	 * Ask current node to find id's successor.
-	 * @param id
-	 * @return id's successor's socket address
-	 */
 	public InetSocketAddress find_successor (long id) {
 
-		// initialize return value as this node's successor (might be null)
 		InetSocketAddress ret = this.getSuccessor();
+		InetSocketAddress pre = findPredecessor(id);
 
-		// find predecessor
-		InetSocketAddress pre = find_predecessor(id);
-
-		// if other node found, ask it for its successor
 		if (!pre.equals(localAddress))
 			ret = Helper.requestAddress(pre, "YOURSUCC");
 
-		// if ret is still null, set it as local node, return
 		if (ret == null)
 			ret = localAddress;
-
 		return ret;
 	}
 
-	/**
-	 * Ask current node to find id's predecessor
-	 * @param id
-	 * @return id's successor's socket address
-	 */
-	private InetSocketAddress find_predecessor (long findid) {
+	private InetSocketAddress findPredecessor (long findid) {
 		InetSocketAddress n = this.localAddress;
 		InetSocketAddress n_successor = this.getSuccessor();
 		InetSocketAddress most_recently_alive = this.localAddress;
@@ -199,11 +156,6 @@ public class Node {
 		return n;
 	}
 
-	/**
-	 * Return closest finger preceding node.
-	 * @param findid
-	 * @return closest finger preceding node's socket address
-	 */
 	public InetSocketAddress closest_preceding_finger (long findid) {
 		long findid_relative = Helper.computeRelativeId(findid, localId);
 
@@ -234,13 +186,6 @@ public class Node {
 		return localAddress;
 	}
 
-	/**
-	 * Update the finger table based on parameters.
-	 * Synchronize, all threads trying to modify 
-	 * finger table only through this method. 
-	 * @param i: index or command code
-	 * @param value
-	 */
 	public synchronized void updateFingers(int i, InetSocketAddress value) {
 		// valid index in [1, 32], just update the ith finger
 		if (i > 0 && i <= 32) {
@@ -260,11 +205,6 @@ public class Node {
 		}
 	}
 
-	/**
-	 * Update ith finger in finger table using new value
-	 * @param i: index
-	 * @param value
-	 */
 	private void updateIthFinger(int i, InetSocketAddress value) {
 		finger.put(i, value);
 
@@ -274,17 +214,12 @@ public class Node {
 		}
 	}
 
-	/**
-	 * Delete successor and all following fingers equal to successor
-	 */
 	private void deleteSuccessor() {
 		InetSocketAddress successor = getSuccessor();
 
-		//nothing to delete, just return
 		if (successor == null)
 			return;
 
-		// find the last existence of successor in the finger table
 		int i = 32;
 		for (i = 32; i > 0; i--) {
 			InetSocketAddress ithfinger = finger.get(i);
@@ -292,16 +227,13 @@ public class Node {
 				break;
 		}
 
-		// delete it, from the last existence to the first one
 		for (int j = i; j >= 1 ; j--) {
 			updateIthFinger(j, null);
 		}
 
-		// if predecessor is successor, delete it
 		if (predecessor!= null && predecessor.equals(successor))
 			setPredecessor(null);
 
-		// try to fill successor
 		fillSuccessor();
 		successor = getSuccessor();
 
@@ -329,15 +261,10 @@ public class Node {
 				}
 			}
 
-			// update successor
 			updateIthFinger(1, p);
 		}
 	}
 
-	/**
-	 * Delete a node from the finger table, here "delete" means deleting all existence of this node 
-	 * @param f
-	 */
 	private void deleteCertainFinger(InetSocketAddress f) {
 		for (int i = 32; i > 0; i--) {
 			InetSocketAddress ithfinger = finger.get(i);
@@ -346,9 +273,6 @@ public class Node {
 		}
 	}
 
-	/**
-	 * Try to fill successor with candidates in finger table or even predecessor
-	 */
 	private void fillSuccessor() {
 		InetSocketAddress successor = this.getSuccessor();
 		if (successor == null || successor.equals(localAddress)) {
@@ -366,30 +290,16 @@ public class Node {
 		if ((successor == null || successor.equals(localAddress)) && predecessor!=null && !predecessor.equals(localAddress)) {
 			updateIthFinger(1, predecessor);
 		}
-
 	}
 
-
-	/**
-	 * Clear predecessor.
-	 */
 	public void clearPredecessor () {
 		setPredecessor(null);
 	}
 
-	/**
-	 * Set predecessor using a new value.
-	 * @param pre
-	 */
+
 	private synchronized void setPredecessor(InetSocketAddress pre) {
 		predecessor = pre;
 	}
-
-
-	/**
-	 * Getters
-	 * @return the variable caller wants
-	 */
 
 	public long getId() {
 		return localId;
@@ -419,18 +329,14 @@ public class Node {
 		timer.start();
 	}
 
-
-	/**
-	 * Stop this node's all threads.
-	 */
 	public void stopAllThreads() {
 		if (listener != null)
 			listener.toDie();
-		if (fix_fingers != null)
-			fix_fingers.toDie();
+		if (fixFinger != null)
+			fixFinger.toDie();
 		if (stabilize != null)
 			stabilize.toDie();
-		if (ask_predecessor != null)
-			ask_predecessor.toDie();
+		if (askPred != null)
+			askPred.toDie();
 	}
 }

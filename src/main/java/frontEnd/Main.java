@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -441,7 +442,12 @@ public class Main implements ActionListener {
 
 		// send out the each of file
 		Log.print();
+		long startTime = System.currentTimeMillis();
+		long elapsedTime = 0L;
+		int numSplit = 0;
 		for (String splitFile : allList) {
+			numSplit += 1;
+			System.out.println("current split num: " + numSplit);
 			System.out.println("\nCurrent Split File: " + splitFile);
 
 			// send out the split file
@@ -490,6 +496,9 @@ public class Main implements ActionListener {
 			// delete all the split files
 			FileUtils.deletelocalFile(DirName, hashFileName);
 		}
+	    elapsedTime = (new Date()).getTime() - startTime;
+	    System.out.println("Uploading Elapsed Time: " + elapsedTime/1000.0 + " seconds");
+	    Log.print("Uploading Elapsed Time: " + elapsedTime/1000.0 + " seconds");
 		Log.print();
 	}
 
@@ -503,6 +512,8 @@ public class Main implements ActionListener {
 		List<String> splitList = Props.seekPrefixKey(encFileName, sentPropFileName);
 
 		Log.print();
+		long startTime = System.currentTimeMillis();
+		long elapsedTime = 0L;
 		for (String splitFile : splitList) {
 			String targetSock = FileUtils.isFromSentProp(splitFile, DirName);
 			InetSocketAddress result = Helper
@@ -537,6 +548,9 @@ public class Main implements ActionListener {
 		String downloadFolder = DirName + Helper.DOWNLOADS;
 		SplitFile.join(encFileName, downloadFolder);
 		Encryption.decrpt(encFileName, DirName, inputFileName);
+	    elapsedTime = (new Date()).getTime() - startTime;
+	    System.out.println("Download Elapsed Time: " + elapsedTime/1000.0 + " seconds");
+	    Log.print("Download Elapsed Time: " + elapsedTime/1000.0 + " seconds");
 		Log.print();
 
 		// delete encoded file and split files

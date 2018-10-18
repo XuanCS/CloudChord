@@ -1,16 +1,17 @@
 package chord;
+
 import java.net.InetSocketAddress;
 
 import utils.Helper;
 
 /**
- * Stabilize thread that periodically asks successor for its predecessor
- * and determine if current node should update or delete its successor.
+ * Stabilize thread that periodically asks successor for its predecessor and
+ * determine if current node should update or delete its successor.
  *
  */
 
 public class Stabilize extends Thread {
-	
+
 	private Node local;
 	private boolean alive;
 
@@ -67,9 +68,5 @@ public class Stabilize extends Thread {
 	public void toDie() {
 		alive = false;
 	}
-
-
-
-
 
 }
